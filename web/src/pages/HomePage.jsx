@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Clock, Shield, FileText, Phone, Mail, CheckCircle2, Wrench, DoorOpen, Lock, ShieldCheck, Lightbulb } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { Clock, Shield, FileText, Phone, Mail, CheckCircle2, Wrench, DoorOpen, Lock, ShieldCheck, Lightbulb, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,8 @@ import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import pb from '@/lib/pocketbaseClient';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { googleReviews } from '@/data/reviews';
+import { getRelativeTime } from '@/utils/dateUtils';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -108,13 +110,32 @@ const HomePage = () => {
     }
   ];
 
-  const position = [45.7640, 4.8357];
+  const position = [45.7640, 4.8357]; // Lyon center coordinates
+  const interventionRadius = 20000; // Rayon
+
+  // 🟢 On filtre les avis (>= 4 étoiles) puis on les duplique pour créer la boucle infinie
+  const filteredReviews = googleReviews.filter(review => review.rating >= 4);
+  const scrollingReviews = [...filteredReviews, ...filteredReviews];
 
   return (
     <>
       <Helmet>
         <title>Serrurerie Roland - Serrurier Lyon 24/7 | Dépannage Urgent</title>
         <meta name="description" content="Serrurier professionnel à Lyon et Villeurbanne. Dépannage urgent 24h/24, portes blindées, rideaux métalliques. 25 ans d'expérience. Devis gratuit." />
+        {/* 🟢 Ajout du CSS pour l'animation de défilement vers la droite */}
+        <style>{`
+          @keyframes scrollRight {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+          }
+          .animate-marquee {
+            animation: scrollRight 80s linear infinite;
+            width: max-content;
+          }
+          .animate-marquee:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
       </Helmet>
 
       <Header />
@@ -205,7 +226,7 @@ const HomePage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
               {highlights.map((highlight, index) => (
                 <div key={index} className="text-center">
                   <div className="inline-flex p-4 bg-amber-500/10 rounded-2xl mb-4">
@@ -215,6 +236,41 @@ const HomePage = () => {
                   <p className="text-slate-400">{highlight.description}</p>
                 </div>
               ))}
+            </div>
+
+            {/* --- SECTION AVIS CLIENTS DÉFILANTS --- */}
+            <div className="border-t border-slate-800 pt-16">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-semibold text-slate-100 mb-4">Ce que disent nos clients</h2>
+                <p className="text-lg text-slate-400">Avis authentiques laissés sur Google et PagesJaunes</p>
+              </div>
+
+              {/* Le conteneur du carrousel avec le masque de fondu transparent sur les bords */}
+              <div 
+                className="relative w-full overflow-hidden" 
+                style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
+              >
+                <div className="flex gap-6 animate-marquee py-4">
+                  {scrollingReviews.map((review, index) => (
+                    <Card key={`${review.id}-${index}`} className="w-[500px] shrink-0 bg-slate-950 border-slate-800 hover:border-slate-700 transition-colors flex flex-col">
+                      <CardContent className="p-6 flex-1 flex flex-col">
+                        <div className="flex gap-1 text-amber-500 mb-5">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star key={i} className="h-5 w-5 fill-current" />
+                          ))}
+                        </div>
+                        <p className="text-slate-300 italic mb-5 leading-relaxed flex-1">
+                          "{review.text}"
+                        </p>
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="font-semibold text-slate-100">{review.author}</span>
+                          <span className="text-sm text-slate-500">{getRelativeTime(review.date)}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -228,11 +284,23 @@ const HomePage = () => {
 
             <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
               <div style={{ height: '500px' }}>
-                <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }}>
+                <MapContainer center={position} zoom={11} style={{ height: '100%', width: '100%' }}>
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  
+                  <Circle 
+                    center={position} 
+                    radius={interventionRadius}
+                    pathOptions={{ 
+                      color: '#f59e0b',
+                      fillColor: '#f59e0b',
+                      fillOpacity: 0.2,
+                      weight: 2
+                    }}
+                  />
+
                   <Marker position={position}>
                     <Popup>
                       <div className="text-center">
