@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import pb from '@/lib/pocketbaseClient';
 
 const Footer = () => {
+  const [businessInfo, setBusinessInfo] = useState({
+    phone: '06 68 67 65 65',
+    email: 'serrurerieroland@orange.fr',
+    address: '62 rue Racine\n69100 Villeurbanne',
+    opening_hours: '24h/24 - 7j/7'
+  });
+
+  useEffect(() => {
+    const fetchBusinessInfo = async () => {
+      try {
+        const records = await pb.collection('business_info').getFullList({ $autoCancel: false });
+        if (records.length > 0) {
+          setBusinessInfo(records[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch business info:', error);
+        // Garde les valeurs par défaut en cas d'erreur
+      }
+    };
+
+    fetchBusinessInfo();
+  }, []);
   return (
     <footer className="bg-slate-900 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -17,18 +40,18 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Contact</h4>
             <div className="space-y-3">
               <a
-                href="tel:0668676565"
+                href={`tel:${businessInfo.phone?.replace(/\s/g, '')}`}
                 className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors duration-200"
               >
                 <Phone className="h-4 w-4" />
-                <span className="text-sm">06 68 67 65 65</span>
+                <span className="text-sm">{businessInfo.phone}</span>
               </a>
               <a
-                href="mailto:serrurerieroland@orange.fr"
+                href={`mailto:${businessInfo.email}`}
                 className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors duration-200"
               >
                 <Mail className="h-4 w-4" />
-                <span className="text-sm">serrurerieroland@orange.fr</span>
+                <span className="text-sm">{businessInfo.email}</span>
               </a>
             </div>
           </div>
@@ -37,7 +60,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Adresse</h4>
             <div className="flex items-start gap-2 text-slate-400">
               <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-              <span className="text-sm">62 rue Racine<br />69100 Villeurbanne</span>
+              <span className="text-sm" dangerouslySetInnerHTML={{ __html: businessInfo.address?.replace('\n', '<br />') }} />
             </div>
           </div>
 
@@ -45,7 +68,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Horaires</h4>
             <div className="flex items-center gap-2 text-slate-400">
               <Clock className="h-4 w-4" />
-              <span className="text-sm">24h/24 - 7j/7</span>
+              <span className="text-sm">{businessInfo.opening_hours}</span>
             </div>
           </div>
         </div>
