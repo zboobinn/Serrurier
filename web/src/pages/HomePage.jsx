@@ -11,6 +11,7 @@ import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import SuccessMessage from '@/components/SuccessMessage.jsx';
+import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import pb from '@/lib/pocketbaseClient';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -27,6 +28,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const { businessInfo } = useBusinessInfo();
 
   useEffect(() => {
     const trackVisit = async () => {
@@ -134,11 +136,11 @@ const HomePage = () => {
               Intervention rapide 24h/24 et 7j/7 à Lyon et ses alentours. 25 ans d'expérience à votre service.
             </p>
             <a
-              href="tel:0668676565"
+              href={`tel:${(businessInfo?.phone ?? '06 68 67 65 65').replace(/\s/g, '')}`}
               className="inline-flex items-center gap-3 px-8 py-4 bg-amber-500 text-slate-950 rounded-xl text-lg font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98] shadow-lg"
             >
               <Phone className="h-6 w-6" />
-              <span>Appelez le 06 68 67 65 65</span>
+              <span>Appelez le {businessInfo?.phone ?? '06 68 67 65 65'}</span>
             </a>
           </div>
         </section>
@@ -235,8 +237,8 @@ const HomePage = () => {
                     <Popup>
                       <div className="text-center">
                         <p className="font-semibold">Serrurerie Roland</p>
-                        <p className="text-sm">62 rue Racine</p>
-                        <p className="text-sm">69100 Villeurbanne</p>
+                        <p className="text-sm">{(businessInfo?.address ?? '62 rue Racine\n69100 Villeurbanne').split('\n')[0]}</p>
+                        <p className="text-sm">{(businessInfo?.address ?? '62 rue Racine\n69100 Villeurbanne').split('\n')[1] ?? ''}</p>
                       </div>
                     </Popup>
                   </Marker>
@@ -330,8 +332,8 @@ const HomePage = () => {
                 <Phone className="h-8 w-8 text-amber-500 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-slate-400 mb-1">Téléphone</p>
-                  <a href="tel:0668676565" className="text-lg font-semibold text-slate-100 hover:text-amber-500 transition-colors duration-200">
-                    06 68 67 65 65
+                  <a href={`tel:${(businessInfo?.phone ?? '06 68 67 65 65').replace(/\s/g, '')}`} className="text-lg font-semibold text-slate-100 hover:text-amber-500 transition-colors duration-200">
+                    {businessInfo?.phone ?? '06 68 67 65 65'}
                   </a>
                 </div>
               </div>
@@ -340,8 +342,8 @@ const HomePage = () => {
                 <Mail className="h-8 w-8 text-amber-500 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-slate-400 mb-1">Email</p>
-                  <a href="mailto:serrurerieroland@orange.fr" className="text-lg font-semibold text-slate-100 hover:text-amber-500 transition-colors duration-200">
-                    serrurerieroland@orange.fr
+                  <a href={`mailto:${businessInfo?.email ?? 'serrurerieroland@orange.fr'}`} className="text-lg font-semibold text-slate-100 hover:text-amber-500 transition-colors duration-200">
+                    {businessInfo?.email ?? 'serrurerieroland@orange.fr'}
                   </a>
                 </div>
               </div>

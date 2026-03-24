@@ -1,30 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
-import pb from '@/lib/pocketbaseClient';
+import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 
 const Footer = () => {
-  const [businessInfo, setBusinessInfo] = useState({
-    phone: '06 68 67 65 65',
-    email: 'serrurerieroland@orange.fr',
-    address: '62 rue Racine\n69100 Villeurbanne',
-    opening_hours: '24h/24 - 7j/7'
-  });
-
-  useEffect(() => {
-    const fetchBusinessInfo = async () => {
-      try {
-        const records = await pb.collection('business_info').getFullList({ $autoCancel: false });
-        if (records.length > 0) {
-          setBusinessInfo(records[0]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch business info:', error);
-        // Garde les valeurs par défaut en cas d'erreur
-      }
-    };
-
-    fetchBusinessInfo();
-  }, []);
+  const { businessInfo } = useBusinessInfo();
   return (
     <footer className="bg-slate-900 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -40,18 +19,18 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Contact</h4>
             <div className="space-y-3">
               <a
-                href={`tel:${businessInfo.phone?.replace(/\s/g, '')}`}
+                href={`tel:${(businessInfo?.phone ?? '06 68 67 65 65').replace(/\s/g, '')}`}
                 className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors duration-200"
               >
                 <Phone className="h-4 w-4" />
-                <span className="text-sm">{businessInfo.phone}</span>
+                <span className="text-sm">{businessInfo?.phone ?? '06 68 67 65 65'}</span>
               </a>
               <a
-                href={`mailto:${businessInfo.email}`}
+                href={`mailto:${businessInfo?.email ?? 'serrurerieroland@orange.fr'}`}
                 className="flex items-center gap-2 text-slate-400 hover:text-amber-500 transition-colors duration-200"
               >
                 <Mail className="h-4 w-4" />
-                <span className="text-sm">{businessInfo.email}</span>
+                <span className="text-sm">{businessInfo?.email ?? 'serrurerieroland@orange.fr'}</span>
               </a>
             </div>
           </div>
@@ -60,7 +39,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Adresse</h4>
             <div className="flex items-start gap-2 text-slate-400">
               <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-              <span className="text-sm" dangerouslySetInnerHTML={{ __html: businessInfo.address?.replace('\n', '<br />') }} />
+              <span className="text-sm" dangerouslySetInnerHTML={{ __html: (businessInfo?.address ?? '62 rue Racine\n69100 Villeurbanne').replace('\n', '<br />') }} />
             </div>
           </div>
 
@@ -68,7 +47,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Horaires</h4>
             <div className="flex items-center gap-2 text-slate-400">
               <Clock className="h-4 w-4" />
-              <span className="text-sm">{businessInfo.opening_hours}</span>
+              <span className="text-sm">{businessInfo?.opening_hours ?? '24h/24 - 7j/7'}</span>
             </div>
           </div>
         </div>

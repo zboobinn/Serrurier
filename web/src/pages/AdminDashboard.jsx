@@ -21,7 +21,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     messages: 0,
     phoneClicks: 0,
-    siteVisits: 0
+    siteVisits: 0,
+    siteVisitsToday: 0 // 🟢 NOUVEAU : Ajout de l'état pour aujourd'hui
   });
   const [loading, setLoading] = useState(true);
 
@@ -40,16 +41,28 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [messagesRes, phoneRes, visitsRes] = await Promise.all([
+      // 🟢 NOUVEAU : Calculer la date d'aujourd'hui à 00:00:00 pour le filtre PocketBase
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      // Format attendu par PocketBase : "YYYY-MM-DD HH:MM:SS.000Z"
+      const startOfDay = today.toISOString().replace('T', ' '); 
+
+      const [messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
         pb.collection('contact_messages').getList(1, 1, { $autoCancel: false }),
         pb.collection('phone_clicks').getList(1, 1, { $autoCancel: false }),
-        pb.collection('site_visits').getList(1, 1, { $autoCancel: false })
+        pb.collection('site_visits').getList(1, 1, { $autoCancel: false }),
+        // 🟢 NOUVEAU : Requête filtrée pour ne prendre que les visites >= à ce matin
+        pb.collection('site_visits').getList(1, 1, { 
+          filter: `created >= "${startOfDay}"`,
+          $autoCancel: false 
+        })
       ]);
 
       setStats({
         messages: messagesRes.totalItems,
         phoneClicks: phoneRes.totalItems,
-        siteVisits: visitsRes.totalItems
+        siteVisits: visitsRes.totalItems,
+        siteVisitsToday: todayVisitsRes.totalItems // 🟢 NOUVEAU : Mise à jour de l'état
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -175,9 +188,13 @@ const AdminDashboard = () => {
                   <Eye className="h-5 w-5 text-amber-500" />
                 </div>
               </CardHeader>
+              {/* 🟢 NOUVEAU : Affichage des visites du jour + total */}
               <CardContent>
-                <p className="text-4xl font-bold text-amber-500">{stats.siteVisits}</p>
-                <p className="text-sm text-slate-400 mt-2">Total des visites</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold text-amber-500">{stats.siteVisitsToday}</p>
+                  <p className="text-sm text-amber-500/80">aujourd'hui</p>
+                </div>
+                <p className="text-sm text-slate-400 mt-2">Total historique : {stats.siteVisits}</p>
               </CardContent>
             </Card>
           </div>

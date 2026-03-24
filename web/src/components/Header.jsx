@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import pb from '@/lib/pocketbaseClient';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('accueil');
+  const { businessInfo } = useBusinessInfo();
 
   const navLinks = [
     { id: 'accueil', label: 'Accueil' },
@@ -78,12 +80,12 @@ const Header = () => {
 
           <div className="hidden md:flex items-center gap-4">
             <a
-              href="tel:0668676565"
+              href={`tel:${businessInfo?.phone?.replace(/\s/g, '') ?? '0668676565'}`}
               onClick={handlePhoneClick}
               className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]"
             >
               <Phone className="h-5 w-5" />
-              <span>06 68 67 65 65</span>
+              <span>{businessInfo?.phone ?? '06 68 67 65 65'}</span>
             </a>
           </div>
 
@@ -113,12 +115,12 @@ const Header = () => {
               </button>
             ))}
             <a
-              href="tel:0668676565"
+              href={`tel:${businessInfo?.phone?.replace(/\s/g, '') ?? '0668676565'}`}
               onClick={handlePhoneClick}
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-amber-500 text-slate-950 rounded-xl font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]"
             >
               <Phone className="h-5 w-5" />
-              <span>06 68 67 65 65</span>
+              <span>{businessInfo?.phone ?? '06 68 67 65 65'}</span>
             </a>
           </nav>
         </div>
