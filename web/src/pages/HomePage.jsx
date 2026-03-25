@@ -31,7 +31,6 @@ const HomePage = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const { businessInfo } = useBusinessInfo();
-  console.log("Infos reçues :", businessInfo);
   const [bannerVisible, setBannerVisible] = useState(true);
 
   useEffect(() => {
