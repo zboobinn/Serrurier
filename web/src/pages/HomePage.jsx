@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import * as LucideIcons from 'lucide-react';
@@ -32,7 +33,7 @@ const fallbackServices = [
   { icon: 'Clock', title: 'Dépannage Urgent 24/7', description: 'Intervention rapide à toute heure, jour et nuit, week-ends et jours fériés.' },
   { icon: 'DoorOpen', title: 'Portes de Garage', description: 'Installation, réparation et motorisation de portes de garage. Tous types de mécanismes.' },
   { icon: 'ShieldCheck', title: 'Portes Blindées', description: 'Pose et installation de portes blindées certifiées pour une sécurité maximale.' },
-  { icon: 'Lock', title: 'Rideaux Métalliques', description: 'Installation et dépannage de rideaux métalliques pour commerces et locaux.' },
+  { icon: 'Lock', title: 'Rideaux Métalliques', description: 'Installation et dépannage de rideaux métalliques pour commerces et locaux professionnels.' },
   { icon: 'Lightbulb', title: 'Conseil en Sécurité', description: 'Audit de sécurité et recommandations personnalisées.' }
 ];
 
@@ -44,6 +45,7 @@ const fallbackHighlights = [
 
 const HomePage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -103,6 +105,16 @@ const HomePage = () => {
   const filteredReviews = reviews.filter(review => review.rating >= 4);
   const scrollingReviews = [...filteredReviews, ...filteredReviews];
 
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
+      }, 150); // Petit délai pour laisser React afficher la page
+    }
+  }, [location.hash]);
+
   return (
     <>
       <Helmet>
@@ -161,40 +173,66 @@ const HomePage = () => {
 
             {/* Les 2 premières cartes (Design horizontal) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              {services.slice(0, 2).map((service, index) => {
+              {services.slice(0, 2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
+                
+                // 🟢 L'ASTUCE EST ICI : On personnalise le lien si c'est 'Garage'
+                let linkUrl = `/service/${service.id}`;
+                if (service.title.includes('Garage')) {
+                  linkUrl = '/services/portes-de-garage';
+                }
+
                 return (
-                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-8 flex-1">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-amber-500/10 rounded-xl flex-shrink-0">
-                          <IconComp className="h-8 w-8 text-amber-500" />
+                  // 🟢 On utilise la variable linkUrl ici
+                  <Link to={linkUrl} key={service.id} className="block h-full group">
+                    <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                      <CardContent className="p-8 flex-1">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-amber-500/10 rounded-xl flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
+                            <IconComp className="h-8 w-8 text-amber-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words group-hover:text-amber-500 transition-colors">{service.title}</h3>
+                            <p className="text-slate-400 leading-relaxed break-words">{service.description}</p>
+                            <span className="inline-block mt-4 text-sm text-amber-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                              En savoir plus ➔
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words">{service.title}</h3>
-                          <p className="text-slate-400 leading-relaxed break-words">{service.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>
 
             {/* Le reste des cartes (Design vertical) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {services.slice(2).map((service, index) => {
+              {services.slice(2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
+
+                // 🟢 L'ASTUCE EST ICI AUSSI : On personnalise le lien si c'est 'Garage'
+                let linkUrl = `/service/${service.id}`;
+                if (service.title.includes('Garage')) {
+                  linkUrl = '/services/portes-de-garage';
+                }
+
                 return (
-                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-8 flex-1 flex flex-col">
-                      <div className="p-3 bg-amber-500/10 rounded-xl w-fit mb-4">
-                        <IconComp className="h-8 w-8 text-amber-500" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words">{service.title}</h3>
-                      <p className="text-slate-400 leading-relaxed break-words flex-1">{service.description}</p>
-                    </CardContent>
-                  </Card>
+                  // 🟢 On utilise la variable linkUrl ici
+                  <Link to={linkUrl} key={service.id} className="block h-full group">
+                    <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                      <CardContent className="p-8 flex-1 flex flex-col">
+                        <div className="p-3 bg-amber-500/10 rounded-xl w-fit mb-4 group-hover:bg-amber-500/20 transition-colors">
+                          <IconComp className="h-8 w-8 text-amber-500" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words group-hover:text-amber-500 transition-colors">{service.title}</h3>
+                        <p className="text-slate-400 leading-relaxed break-words flex-1">{service.description}</p>
+                        <span className="inline-block mt-4 text-sm text-amber-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                          En savoir plus ➔
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>

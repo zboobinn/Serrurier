@@ -22,7 +22,7 @@ const AdminDashboard = () => {
     info: true,
     services: false,
     highlights: false,
-    reviews: false // 🟢 Nouvel accordéon
+    reviews: false
   });
 
   // States Infos Générales
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({ messages: 0, phoneClicks: 0, siteVisits: 0, siteVisitsToday: 0 });
   const [services, setServices] = useState([]);
   const [highlights, setHighlights] = useState([]);
-  const [reviews, setReviews] = useState([]); // 🟢 Nouveau state pour les avis
+  const [reviews, setReviews] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
         pb.collection('business_info').getFullList({ $autoCancel: false }),
         pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
         pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
-        pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false }), // 🟢 Récupération des avis (triés par date)
+        pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false }),
         pb.collection('contact_messages').getList(1, 1, { $autoCancel: false }),
         pb.collection('phone_clicks').getList(1, 1, { $autoCancel: false }),
         pb.collection('site_visits').getList(1, 1, { $autoCancel: false }),
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
       }
       setServices(servicesRes);
       setHighlights(highlightsRes);
-      setReviews(reviewsRes); // 🟢 On stocke les avis
+      setReviews(reviewsRes);
 
       setStats({
         messages: messagesRes.totalItems,
@@ -108,11 +108,9 @@ const AdminDashboard = () => {
       let newItemData = { visible: true };
 
       if (collection === 'reviews') {
-        // Modèle pour un nouvel avis
         const today = new Date().toISOString().split('T')[0];
         newItemData = { ...newItemData, author: 'Nouveau client', text: 'Excellent travail...', rating: 5, date: today };
       } else {
-        // Modèle pour un service/highlight
         newItemData = { ...newItemData, title: 'Nouveau titre', description: 'Description...', icon: 'Wrench' };
       }
 
@@ -120,7 +118,7 @@ const AdminDashboard = () => {
 
       if (collection === 'services') setServices([...services, newItem]);
       else if (collection === 'highlights') setHighlights([...highlights, newItem]);
-      else if (collection === 'reviews') setReviews([newItem, ...reviews]); // On l'ajoute au début
+      else if (collection === 'reviews') setReviews([newItem, ...reviews]);
 
       toast.success('Élément ajouté');
     } catch (error) { toast.error('Erreur lors de l\'ajout'); }
@@ -313,7 +311,7 @@ const AdminDashboard = () => {
           {renderStandardList("Gestion des Services", "Ces éléments s'affichent sous forme de grandes cartes", "services", services, "services")}
           {renderStandardList("Points Forts", "Ces éléments s'affichent au-dessus des avis", "highlights", highlights, "highlights")}
 
-          {/* 🟢 NOUVEL ACCORDÉON : AVIS CLIENTS */}
+          {/* 🟢 ACCORDÉON : AVIS CLIENTS */}
           <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
             <div 
               className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
