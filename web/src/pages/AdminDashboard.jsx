@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { LogOut, Edit2, Save, X, MessageSquare, Phone, Eye } from 'lucide-react';
+import { LogOut, Edit2, Save, X, MessageSquare, Phone, Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import pb from '@/lib/pocketbaseClient';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import { toast } from 'sonner';
@@ -15,110 +15,144 @@ import { toast } from 'sonner';
 const AdminDashboard = () => {
   const { logout, currentAdmin } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  // States pour les accordéons
+  const [expandedSections, setExpandedSections] = useState({
+    info: true,
+    services: false,
+    highlights: false
+  });
+
+  // States Infos Générales
   const [businessInfo, setBusinessInfo] = useState(null);
   const [editMode, setEditMode] = useState({});
   const [editValues, setEditValues] = useState({});
-  const [stats, setStats] = useState({
-    messages: 0,
-    phoneClicks: 0,
-    siteVisits: 0,
-    siteVisitsToday: 0 // 🟢 NOUVEAU : Ajout de l'état pour aujourd'hui
-  });
-  const [loading, setLoading] = useState(true);
 
-  const fetchBusinessInfo = async () => {
-    try {
-      const records = await pb.collection('business_info').getFullList({ $autoCancel: false });
-      if (records.length > 0) {
-        setBusinessInfo(records[0]);
-        setEditValues(records[0]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch business info:', error);
-      toast.error('Erreur lors du chargement des informations');
-    }
-  };
+  // States Statistiques & Collections
+  const [stats, setStats] = useState({ messages: 0, phoneClicks: 0, siteVisits: 0, siteVisitsToday: 0 });
+  const [services, setServices] = useState([]);
+  const [highlights, setHighlights] = useState([]);
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     try {
-      // 🟢 NOUVEAU : Calculer la date d'aujourd'hui à 00:00:00 pour le filtre PocketBase
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      // Format attendu par PocketBase : "YYYY-MM-DD HH:MM:SS.000Z"
       const startOfDay = today.toISOString().replace('T', ' '); 
 
-      const [messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
+      const [infoRes, servicesRes, highlightsRes, messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
+        pb.collection('business_info').getFullList({ $autoCancel: false }),
+        pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
+        pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
         pb.collection('contact_messages').getList(1, 1, { $autoCancel: false }),
         pb.collection('phone_clicks').getList(1, 1, { $autoCancel: false }),
         pb.collection('site_visits').getList(1, 1, { $autoCancel: false }),
-        // 🟢 NOUVEAU : Requête filtrée pour ne prendre que les visites >= à ce matin
-        pb.collection('site_visits').getList(1, 1, { 
-          filter: `created >= "${startOfDay}"`,
-          $autoCancel: false 
-        })
+        pb.collection('site_visits').getList(1, 1, { filter: `created >= "${startOfDay}"`, $autoCancel: false })
       ]);
+
+      if (infoRes.length > 0) {
+        setBusinessInfo(infoRes[0]);
+        setEditValues(infoRes[0]);
+      }
+      setServices(servicesRes);
+      setHighlights(highlightsRes);
 
       setStats({
         messages: messagesRes.totalItems,
         phoneClicks: phoneRes.totalItems,
         siteVisits: visitsRes.totalItems,
-        siteVisitsToday: todayVisitsRes.totalItems // 🟢 NOUVEAU : Mise à jour de l'état
+        siteVisitsToday: todayVisitsRes.totalItems
       });
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      toast.error('Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([fetchBusinessInfo(), fetchStats()]);
-      setLoading(false);
-    };
-
-    loadData();
-
-    const interval = setInterval(fetchStats, 30000);
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = () => { logout(); navigate('/'); };
+  
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const toggleEdit = (field) => {
-    setEditMode(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-
-  const handleSave = async (field) => {
+  // --- Gestion des Infos Générales ---
+  const toggleEdit = (field) => setEditMode(prev => ({ ...prev, [field]: !prev[field] }));
+  const handleCancel = (field) => { setEditValues(prev => ({ ...prev, [field]: businessInfo[field] })); setEditMode(prev => ({ ...prev, [field]: false })); };
+  
+  const handleSaveInfo = async (field) => {
     try {
-      await pb.collection('business_info').update(businessInfo.id, {
-        [field]: editValues[field]
-      }, { $autoCancel: false });
-
+      await pb.collection('business_info').update(businessInfo.id, { [field]: editValues[field] }, { $autoCancel: false });
       setBusinessInfo(prev => ({ ...prev, [field]: editValues[field] }));
       setEditMode(prev => ({ ...prev, [field]: false }));
       toast.success('Modifications enregistrées');
-    } catch (error) {
-      console.error('Failed to update:', error);
-      toast.error('Erreur lors de la sauvegarde');
-    }
+    } catch (error) { toast.error('Erreur lors de la sauvegarde'); }
   };
 
-  const handleCancel = (field) => {
-    setEditValues(prev => ({ ...prev, [field]: businessInfo[field] }));
-    setEditMode(prev => ({ ...prev, [field]: false }));
+  // --- Gestion CRUD ---
+  const handleAddItem = async (e, collection) => {
+    e.stopPropagation(); // Évite que le clic ouvre/ferme l'accordéon
+    if (collection === 'services') setExpandedSections(prev => ({...prev, services: true}));
+    if (collection === 'highlights') setExpandedSections(prev => ({...prev, highlights: true}));
+
+    try {
+      const newItem = await pb.collection(collection).create({ 
+        title: 'Nouveau titre', 
+        description: 'Description...', 
+        icon: 'Wrench',
+        visible: true // Visible par défaut
+      }, { $autoCancel: false });
+
+      if (collection === 'services') setServices([...services, newItem]);
+      else setHighlights([...highlights, newItem]);
+      toast.success('Élément ajouté');
+    } catch (error) { toast.error('Erreur lors de l\'ajout'); }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  const handleLocalChange = (collection, id, field, value) => {
+    const updateState = (state, setState) => {
+      setState(state.map(item => item.id === id ? { ...item, [field]: value } : item));
+    };
+    if (collection === 'services') updateState(services, setServices);
+    else updateState(highlights, setHighlights);
+  };
 
-const fields = [
+  const handleSaveItemDB = async (collection, id, field, value) => {
+    try {
+      await pb.collection(collection).update(id, { [field]: value }, { $autoCancel: false });
+      toast.success('Sauvegardé');
+    } catch (error) { toast.error('Erreur de synchronisation'); }
+  };
+
+  const handleToggleVisibility = async (collectionName, item) => {
+    // Si item.visible est undefined (ancien élément), on le considère comme true, donc le toggle donnera false.
+    const newValue = item.visible === false ? true : false; 
+    handleLocalChange(collectionName, item.id, 'visible', newValue);
+    try {
+      await pb.collection(collectionName).update(item.id, { visible: newValue }, { $autoCancel: false });
+      toast.success(newValue ? 'Élément visible sur le site' : 'Élément masqué du site');
+    } catch (error) { toast.error('Erreur lors de la mise à jour'); }
+  };
+
+  const handleDeleteItem = async (collection, id) => {
+    if (!window.confirm('Voulez-vous vraiment supprimer cet élément ?')) return;
+    try {
+      await pb.collection(collection).delete(id, { $autoCancel: false });
+      if (collection === 'services') setServices(services.filter(s => s.id !== id));
+      else setHighlights(highlights.filter(h => h.id !== id));
+      toast.success('Élément supprimé');
+    } catch (error) { toast.error('Erreur lors de la suppression'); }
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950"><LoadingSpinner size="lg" /></div>;
+
+  const fields = [
     { key: 'address', label: 'Adresse', type: 'text' },
     { key: 'phone', label: 'Téléphone', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
@@ -127,149 +161,185 @@ const fields = [
     { key: 'intervention_radius', label: 'Rayon d\'intervention (en km)', type: 'number' }
   ];
 
+  const renderDynamicList = (title, description, collectionName, items, sectionKey) => (
+    <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
+      <div 
+        className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
+        onClick={() => toggleSection(sectionKey)}
+      >
+        <div>
+          <CardTitle className="text-slate-100">{title}</CardTitle>
+          <CardDescription className="text-slate-400 mt-1">{description}</CardDescription>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button onClick={(e) => handleAddItem(e, collectionName)} size="sm" className="bg-amber-500 text-slate-950 hover:bg-amber-400 z-10 relative">
+            <Plus className="h-4 w-4 mr-1" /> Ajouter
+          </Button>
+          <div className="text-slate-500">
+            {expandedSections[sectionKey] ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+          </div>
+        </div>
+      </div>
+      
+      {expandedSections[sectionKey] && (
+        <CardContent className="space-y-4 pt-0">
+          <div className="border-t border-slate-800 pt-6">
+            {items.map((item) => (
+              <div key={item.id} className={`p-4 bg-slate-800/50 rounded-lg border relative group mb-4 transition-all ${item.visible === false ? 'border-slate-800 opacity-60' : 'border-slate-700'}`}>
+                
+                {/* Actions en haut à droite */}
+                <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
+                  <Button 
+                    onClick={() => handleToggleVisibility(collectionName, item)} 
+                    variant="ghost" size="icon" 
+                    className={`${item.visible === false ? 'text-slate-500 hover:text-slate-300' : 'text-amber-500 hover:text-amber-400'} hover:bg-slate-700/50`}
+                    title={item.visible === false ? "Afficher sur le site" : "Masquer du site"}
+                  >
+                    {item.visible === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button 
+                    onClick={() => handleDeleteItem(collectionName, item.id)} 
+                    variant="ghost" size="icon" 
+                    className="text-red-400 hover:bg-red-400/20"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 pr-20">
+                  <div>
+                    <Label className="text-slate-400 text-xs mb-1 block">Titre</Label>
+                    <Input 
+                      value={item.title} 
+                      onChange={(e) => handleLocalChange(collectionName, item.id, 'title', e.target.value)}
+                      onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'title', e.target.value)}
+                      className="bg-slate-900 border-slate-700 text-slate-100 h-9" 
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs mb-1 block">Icône (En anglais ex: Key, Lock)</Label>
+                    <Input 
+                      value={item.icon} 
+                      onChange={(e) => handleLocalChange(collectionName, item.id, 'icon', e.target.value)}
+                      onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'icon', e.target.value)}
+                      className="bg-slate-900 border-slate-700 text-slate-100 h-9" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs mb-1 block">Description</Label>
+                  <Textarea 
+                    value={item.description} 
+                    onChange={(e) => handleLocalChange(collectionName, item.id, 'description', e.target.value)}
+                    onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'description', e.target.value)}
+                    className="bg-slate-900 border-slate-700 text-slate-100" 
+                    rows={2} 
+                  />
+                </div>
+              </div>
+            ))}
+            {items.length === 0 && <p className="text-slate-500 italic text-center py-4">Aucun élément.</p>}
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+
   return (
     <>
-      <Helmet>
-        <title>Tableau de Bord Admin - Serrurerie Roland</title>
-        <meta name="description" content="Tableau de bord administrateur" />
-      </Helmet>
+      <Helmet><title>Tableau de Bord Admin - Serrurerie Roland</title></Helmet>
 
-      <div className="min-h-screen bg-slate-950">
-        <header className="bg-slate-900 border-b border-slate-800">
+      <div className="min-h-screen bg-slate-950 pb-20">
+        <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-amber-500">Tableau de Bord Admin</h1>
                 <p className="text-sm text-slate-400 mt-1">Bienvenue, {currentAdmin?.email}</p>
               </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-amber-500"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
+              <Button onClick={handleLogout} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+                <LogOut className="h-4 w-4 mr-2" /> Déconnexion
               </Button>
             </div>
           </div>
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          
+          {/* STATISTIQUES */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-100">Messages Reçus</CardTitle>
-                  <MessageSquare className="h-5 w-5 text-amber-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-4xl font-bold text-amber-500">{stats.messages}</p>
-                <p className="text-sm text-slate-400 mt-2">Total des messages de contact</p>
-              </CardContent>
+              <CardHeader><div className="flex justify-between"><CardTitle className="text-slate-100">Messages</CardTitle><MessageSquare className="h-5 w-5 text-amber-500" /></div></CardHeader>
+              <CardContent><p className="text-4xl font-bold text-amber-500">{stats.messages}</p></CardContent>
             </Card>
-
             <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-100">Clics Téléphone</CardTitle>
-                  <Phone className="h-5 w-5 text-amber-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-4xl font-bold text-amber-500">{stats.phoneClicks}</p>
-                <p className="text-sm text-slate-400 mt-2">Nombre d'appels initiés</p>
-              </CardContent>
+              <CardHeader><div className="flex justify-between"><CardTitle className="text-slate-100">Clics Téléphone</CardTitle><Phone className="h-5 w-5 text-amber-500" /></div></CardHeader>
+              <CardContent><p className="text-4xl font-bold text-amber-500">{stats.phoneClicks}</p></CardContent>
             </Card>
-
             <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-100">Visites du Site</CardTitle>
-                  <Eye className="h-5 w-5 text-amber-500" />
-                </div>
-              </CardHeader>
-              {/* 🟢 NOUVEAU : Affichage des visites du jour + total */}
-              <CardContent>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold text-amber-500">{stats.siteVisitsToday}</p>
-                  <p className="text-sm text-amber-500/80">aujourd'hui</p>
-                </div>
-                <p className="text-sm text-slate-400 mt-2">Total historique : {stats.siteVisits}</p>
-              </CardContent>const field
+              <CardHeader><div className="flex justify-between"><CardTitle className="text-slate-100">Visites du Site</CardTitle><Eye className="h-5 w-5 text-amber-500" /></div></CardHeader>
+              <CardContent><div className="flex items-baseline gap-2"><p className="text-4xl font-bold text-amber-500">{stats.siteVisitsToday}</p><p className="text-sm text-amber-500/80">aujourd'hui</p></div><p className="text-sm text-slate-400 mt-2">Total : {stats.siteVisits}</p></CardContent>
             </Card>
           </div>
 
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader>
-              <CardTitle className="text-slate-100">Informations de l'Entreprise</CardTitle>
-              <CardDescription className="text-slate-400">
-                Gérez les informations affichées sur le site web
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {fields.map((field) => (
-                <div key={field.key} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-slate-200">{field.label}</Label>
-                    {!editMode[field.key] ? (
-                      <Button
-                        onClick={() => toggleEdit(field.key)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-amber-500 hover:text-amber-400 hover:bg-slate-800"
-                      >
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => handleSave(field.key)}
-                          size="sm"
-                          className="bg-amber-500 text-slate-950 hover:bg-amber-400"
-                        >
-                          <Save className="h-4 w-4 mr-1" />
-                          Sauvegarder
-                        </Button>
-                        <Button
-                          onClick={() => handleCancel(field.key)}
-                          variant="outline"
-                          size="sm"
-                          className="border-slate-700 text-slate-300 hover:bg-slate-800"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Annuler
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {editMode[field.key] ? (
-                    field.type === 'textarea' ? (
-                      <Textarea
-                        value={editValues[field.key] || ''}
-                        onChange={(e) => setEditValues(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        className="bg-slate-800 border-slate-700 text-slate-100"
-                        rows={3}
-                      />
-                    ) : (
-                      <Input
-                        type={field.type}
-                        value={editValues[field.key] || ''}
-                        onChange={(e) => setEditValues(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        className="bg-slate-800 border-slate-700 text-slate-100"
-                      />
-                    )
-                  ) : (
-                    <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                      <p className="text-slate-300">{businessInfo?.[field.key] || 'Non défini'}</p>
+          {/* ACCORDÉON : INFORMATIONS DE BASE */}
+          <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
+            <div 
+              className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
+              onClick={() => toggleSection('info')}
+            >
+              <div>
+                <CardTitle className="text-slate-100">Informations de l'Entreprise</CardTitle>
+                <CardDescription className="text-slate-400 mt-1">Coordonnées et message de fermeture</CardDescription>
+              </div>
+              <div className="text-slate-500">
+                {expandedSections.info ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+              </div>
+            </div>
+            
+            {expandedSections.info && (
+              <CardContent className="space-y-6 pt-0 border-t border-slate-800 pt-6 mt-2">
+                {fields.map((field) => (
+                  <div key={field.key} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-slate-200">{field.label}</Label>
+                      {!editMode[field.key] ? (
+                        <Button onClick={() => toggleEdit(field.key)} variant="ghost" size="sm" className="text-amber-500 hover:text-amber-400 hover:bg-slate-800"><Edit2 className="h-4 w-4 mr-1" />Modifier</Button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Button onClick={() => handleSaveInfo(field.key)} size="sm" className="bg-amber-500 text-slate-950 hover:bg-amber-400"><Save className="h-4 w-4 mr-1" />Sauvegarder</Button>
+                          <Button onClick={() => handleCancel(field.key)} variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800"><X className="h-4 w-4 mr-1" />Annuler</Button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
+                    {editMode[field.key] ? (
+                      field.type === 'textarea' ? <Textarea value={editValues[field.key] || ''} onChange={(e) => setEditValues(prev => ({ ...prev, [field.key]: e.target.value }))} className="bg-slate-800 border-slate-700 text-slate-100" rows={3} />
+                      : <Input type={field.type} value={editValues[field.key] || ''} onChange={(e) => setEditValues(prev => ({ ...prev, [field.key]: e.target.value }))} className="bg-slate-800 border-slate-700 text-slate-100" />
+                    ) : <div className="p-3 bg-slate-800 rounded-lg border border-slate-700"><p className="text-slate-300">{businessInfo?.[field.key] || 'Non défini'}</p></div>}
+                  </div>
+                ))}
+              </CardContent>
+            )}
           </Card>
+
+          {/* ACCORDÉONS : SERVICES & HIGHLIGHTS */}
+          {renderDynamicList(
+            "Gestion des Services", 
+            "Ces éléments s'affichent sous forme de grandes cartes", 
+            "services", 
+            services,
+            "services"
+          )}
+          
+          {renderDynamicList(
+            "Points Forts (25 Ans d'Expérience)", 
+            "Ces éléments s'affichent au-dessus des avis", 
+            "highlights", 
+            highlights,
+            "highlights"
+          )}
+
         </main>
       </div>
     </>
