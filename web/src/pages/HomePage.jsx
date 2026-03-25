@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
-import { Clock, Shield, FileText, Phone, Mail, CheckCircle2, Wrench, DoorOpen, Lock, ShieldCheck, Lightbulb, Star } from 'lucide-react';
+import { X, Clock, Shield, FileText, Phone, Mail, CheckCircle2, Wrench, DoorOpen, Lock, ShieldCheck, Lightbulb, Star, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,8 @@ const HomePage = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const { businessInfo } = useBusinessInfo();
+  console.log("Infos reçues :", businessInfo);
+  const [bannerVisible, setBannerVisible] = useState(true);
 
   useEffect(() => {
     const trackVisit = async () => {
@@ -111,7 +113,7 @@ const HomePage = () => {
   ];
 
   const position = [45.7640, 4.8357]; // Lyon center coordinates
-  const interventionRadius = 20000; // Rayon
+  const interventionRadius = (businessInfo?.intervention_radius || 20) * 1000;
 
   // 🟢 On filtre les avis (>= 4 étoiles) puis on les duplique pour créer la boucle infinie
   const filteredReviews = googleReviews.filter(review => review.rating >= 4);
@@ -139,6 +141,29 @@ const HomePage = () => {
       </Helmet>
 
       <Header />
+
+      {/* 🟢 BANNIÈRE DE FERMETURE : Fixée en haut sous le menu */}
+      {businessInfo?.closure_message && bannerVisible && (
+        <div className="fixed top-[76px] left-0 w-full bg-red-600/95 backdrop-blur-sm border-b border-red-500 px-4 py-3 z-50 shadow-lg animate-in slide-in-from-top-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-center">
+            
+            <div className="flex items-center justify-center gap-3 flex-1">
+              <AlertTriangle className="h-5 w-5 text-white flex-shrink-0" />
+              <p className="text-white font-medium text-sm md:text-base">
+                {businessInfo.closure_message}
+              </p>
+            </div>
+            
+            <button 
+              onClick={() => setBannerVisible(false)} 
+              className="p-1.5 rounded-full text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+              title="Fermer cette alerte"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <main>
         <section id="accueil" className="relative min-h-screen flex items-center justify-center">

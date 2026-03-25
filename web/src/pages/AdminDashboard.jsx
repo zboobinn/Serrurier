@@ -118,12 +118,13 @@ const AdminDashboard = () => {
     );
   }
 
-  const fields = [
+const fields = [
     { key: 'address', label: 'Adresse', type: 'text' },
     { key: 'phone', label: 'Téléphone', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
     { key: 'opening_hours', label: 'Horaires', type: 'text' },
-    { key: 'closure_message', label: 'Message de fermeture', type: 'textarea' }
+    { key: 'closure_message', label: 'Message de fermeture', type: 'textarea' },
+    { key: 'intervention_radius', label: 'Rayon d\'intervention (en km)', type: 'number' }
   ];
 
   return (
@@ -195,7 +196,7 @@ const AdminDashboard = () => {
                   <p className="text-sm text-amber-500/80">aujourd'hui</p>
                 </div>
                 <p className="text-sm text-slate-400 mt-2">Total historique : {stats.siteVisits}</p>
-              </CardContent>
+              </CardContent>const field
             </Card>
           </div>
 
