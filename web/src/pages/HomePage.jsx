@@ -134,7 +134,7 @@ const HomePage = () => {
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
             <h1 className="text-5xl md:text-7xl font-bold text-slate-100 mb-6" style={{ letterSpacing: '-0.02em' }}>
-              Votre Serrurier Lyonnais
+              Votre Serrurier Lyonnais de Confiance
             </h1>
             <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
               Intervention rapide 24h/24 et 7j/7. 25 ans d'expérience.
