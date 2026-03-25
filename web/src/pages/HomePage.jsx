@@ -129,7 +129,7 @@ const HomePage = () => {
       <main>
         {/* ACCUEIL */}
         <section id="accueil" className="relative min-h-screen flex items-center justify-center">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1683115098516-9b8d5c643b5b)' }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(web\public\fond-homepage.jpg)' }}>
             <div className="absolute inset-0 bg-slate-950/80"></div>
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
