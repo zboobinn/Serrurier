@@ -53,21 +53,25 @@ const HomePage = () => {
   // States pour les données dynamiques de PocketBase
   const [services, setServices] = useState(fallbackServices);
   const [highlights, setHighlights] = useState(fallbackHighlights);
+  const [reviews, setReviews] = useState(googleReviews);
 
   useEffect(() => {
     const fetchDynamicData = async () => {
       try {
-        const [servicesData, highlightsData] = await Promise.all([
+        const [servicesData, highlightsData, reviewsData] = await Promise.all([
           pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
-          pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false })
+          pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
+          pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false })
         ]);
 
         // On ne garde que ceux qui sont visibles
         const visibleServices = servicesData.filter(s => s.visible !== false);
         const visibleHighlights = highlightsData.filter(h => h.visible !== false);
+        const visibleReviews = reviewsData.filter(r => r.visible !== false);
 
         if (visibleServices.length > 0) setServices(visibleServices);
         if (visibleHighlights.length > 0) setHighlights(visibleHighlights);
+        if (visibleReviews.length > 0) setReviews(visibleReviews);
       } catch (error) {
         console.error('Erreur data:', error);
       }
@@ -96,7 +100,7 @@ const HomePage = () => {
 
   const position = [45.7640, 4.8357];
   const interventionRadius = (businessInfo?.intervention_radius || 20) * 1000;
-  const filteredReviews = googleReviews.filter(review => review.rating >= 4);
+  const filteredReviews = reviews.filter(review => review.rating >= 4);
   const scrollingReviews = [...filteredReviews, ...filteredReviews];
 
   return (
@@ -129,7 +133,7 @@ const HomePage = () => {
       <main>
         {/* ACCUEIL */}
         <section id="accueil" className="relative min-h-screen flex items-center justify-center">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(web\public\fond-homepage.jpg)' }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/fond-homepage.jpg)' }}>
             <div className="absolute inset-0 bg-slate-950/80"></div>
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">

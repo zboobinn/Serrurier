@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext.jsx';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, initialLoading } = useAuth();
 
+  // Écran de chargement le temps que React lise le jeton de session (évite les bugs au F5)
   if (initialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
@@ -13,8 +14,9 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  // 🟢 La correction est ici : on renvoie vers /login propre
   if (!isAuthenticated) {
-    return <Navigate to="/admin-login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

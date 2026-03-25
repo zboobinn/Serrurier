@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { LogOut, Edit2, Save, X, MessageSquare, Phone, Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { LogOut, Edit2, Save, X, MessageSquare, Phone, Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import pb from '@/lib/pocketbaseClient';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import { toast } from 'sonner';
@@ -21,7 +21,8 @@ const AdminDashboard = () => {
   const [expandedSections, setExpandedSections] = useState({
     info: true,
     services: false,
-    highlights: false
+    highlights: false,
+    reviews: false // 🟢 Nouvel accordéon
   });
 
   // States Infos Générales
@@ -33,6 +34,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({ messages: 0, phoneClicks: 0, siteVisits: 0, siteVisitsToday: 0 });
   const [services, setServices] = useState([]);
   const [highlights, setHighlights] = useState([]);
+  const [reviews, setReviews] = useState([]); // 🟢 Nouveau state pour les avis
 
   const fetchData = async () => {
     try {
@@ -40,10 +42,11 @@ const AdminDashboard = () => {
       today.setHours(0, 0, 0, 0);
       const startOfDay = today.toISOString().replace('T', ' '); 
 
-      const [infoRes, servicesRes, highlightsRes, messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
+      const [infoRes, servicesRes, highlightsRes, reviewsRes, messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
         pb.collection('business_info').getFullList({ $autoCancel: false }),
         pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
         pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
+        pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false }), // 🟢 Récupération des avis (triés par date)
         pb.collection('contact_messages').getList(1, 1, { $autoCancel: false }),
         pb.collection('phone_clicks').getList(1, 1, { $autoCancel: false }),
         pb.collection('site_visits').getList(1, 1, { $autoCancel: false }),
@@ -56,6 +59,7 @@ const AdminDashboard = () => {
       }
       setServices(servicesRes);
       setHighlights(highlightsRes);
+      setReviews(reviewsRes); // 🟢 On stocke les avis
 
       setStats({
         messages: messagesRes.totalItems,
@@ -95,22 +99,29 @@ const AdminDashboard = () => {
     } catch (error) { toast.error('Erreur lors de la sauvegarde'); }
   };
 
-  // --- Gestion CRUD ---
+  // --- Gestion CRUD (Services, Highlights, Reviews) ---
   const handleAddItem = async (e, collection) => {
-    e.stopPropagation(); // Évite que le clic ouvre/ferme l'accordéon
-    if (collection === 'services') setExpandedSections(prev => ({...prev, services: true}));
-    if (collection === 'highlights') setExpandedSections(prev => ({...prev, highlights: true}));
+    e.stopPropagation();
+    setExpandedSections(prev => ({...prev, [collection]: true}));
 
     try {
-      const newItem = await pb.collection(collection).create({ 
-        title: 'Nouveau titre', 
-        description: 'Description...', 
-        icon: 'Wrench',
-        visible: true // Visible par défaut
-      }, { $autoCancel: false });
+      let newItemData = { visible: true };
+
+      if (collection === 'reviews') {
+        // Modèle pour un nouvel avis
+        const today = new Date().toISOString().split('T')[0];
+        newItemData = { ...newItemData, author: 'Nouveau client', text: 'Excellent travail...', rating: 5, date: today };
+      } else {
+        // Modèle pour un service/highlight
+        newItemData = { ...newItemData, title: 'Nouveau titre', description: 'Description...', icon: 'Wrench' };
+      }
+
+      const newItem = await pb.collection(collection).create(newItemData, { $autoCancel: false });
 
       if (collection === 'services') setServices([...services, newItem]);
-      else setHighlights([...highlights, newItem]);
+      else if (collection === 'highlights') setHighlights([...highlights, newItem]);
+      else if (collection === 'reviews') setReviews([newItem, ...reviews]); // On l'ajoute au début
+
       toast.success('Élément ajouté');
     } catch (error) { toast.error('Erreur lors de l\'ajout'); }
   };
@@ -120,7 +131,8 @@ const AdminDashboard = () => {
       setState(state.map(item => item.id === id ? { ...item, [field]: value } : item));
     };
     if (collection === 'services') updateState(services, setServices);
-    else updateState(highlights, setHighlights);
+    else if (collection === 'highlights') updateState(highlights, setHighlights);
+    else if (collection === 'reviews') updateState(reviews, setReviews);
   };
 
   const handleSaveItemDB = async (collection, id, field, value) => {
@@ -131,12 +143,11 @@ const AdminDashboard = () => {
   };
 
   const handleToggleVisibility = async (collectionName, item) => {
-    // Si item.visible est undefined (ancien élément), on le considère comme true, donc le toggle donnera false.
     const newValue = item.visible === false ? true : false; 
     handleLocalChange(collectionName, item.id, 'visible', newValue);
     try {
       await pb.collection(collectionName).update(item.id, { visible: newValue }, { $autoCancel: false });
-      toast.success(newValue ? 'Élément visible sur le site' : 'Élément masqué du site');
+      toast.success(newValue ? 'Élément visible' : 'Élément masqué');
     } catch (error) { toast.error('Erreur lors de la mise à jour'); }
   };
 
@@ -145,7 +156,8 @@ const AdminDashboard = () => {
     try {
       await pb.collection(collection).delete(id, { $autoCancel: false });
       if (collection === 'services') setServices(services.filter(s => s.id !== id));
-      else setHighlights(highlights.filter(h => h.id !== id));
+      else if (collection === 'highlights') setHighlights(highlights.filter(h => h.id !== id));
+      else if (collection === 'reviews') setReviews(reviews.filter(r => r.id !== id));
       toast.success('Élément supprimé');
     } catch (error) { toast.error('Erreur lors de la suppression'); }
   };
@@ -161,7 +173,8 @@ const AdminDashboard = () => {
     { key: 'intervention_radius', label: 'Rayon d\'intervention (en km)', type: 'number' }
   ];
 
-  const renderDynamicList = (title, description, collectionName, items, sectionKey) => (
+  // Fonction pour afficher les listes standard (Services/Highlights)
+  const renderStandardList = (title, description, collectionName, items, sectionKey) => (
     <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
       <div 
         className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
@@ -187,22 +200,11 @@ const AdminDashboard = () => {
             {items.map((item) => (
               <div key={item.id} className={`p-4 bg-slate-800/50 rounded-lg border relative group mb-4 transition-all ${item.visible === false ? 'border-slate-800 opacity-60' : 'border-slate-700'}`}>
                 
-                {/* Actions en haut à droite */}
                 <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
-                  <Button 
-                    onClick={() => handleToggleVisibility(collectionName, item)} 
-                    variant="ghost" size="icon" 
-                    className={`${item.visible === false ? 'text-slate-500 hover:text-slate-300' : 'text-amber-500 hover:text-amber-400'} hover:bg-slate-700/50`}
-                    title={item.visible === false ? "Afficher sur le site" : "Masquer du site"}
-                  >
+                  <Button onClick={() => handleToggleVisibility(collectionName, item)} variant="ghost" size="icon" className={`${item.visible === false ? 'text-slate-500 hover:text-slate-300' : 'text-amber-500 hover:text-amber-400'} hover:bg-slate-700/50`} title={item.visible === false ? "Afficher" : "Masquer"}>
                     {item.visible === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
-                  <Button 
-                    onClick={() => handleDeleteItem(collectionName, item.id)} 
-                    variant="ghost" size="icon" 
-                    className="text-red-400 hover:bg-red-400/20"
-                    title="Supprimer"
-                  >
+                  <Button onClick={() => handleDeleteItem(collectionName, item.id)} variant="ghost" size="icon" className="text-red-400 hover:bg-red-400/20" title="Supprimer">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -210,32 +212,16 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 pr-20">
                   <div>
                     <Label className="text-slate-400 text-xs mb-1 block">Titre</Label>
-                    <Input 
-                      value={item.title} 
-                      onChange={(e) => handleLocalChange(collectionName, item.id, 'title', e.target.value)}
-                      onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'title', e.target.value)}
-                      className="bg-slate-900 border-slate-700 text-slate-100 h-9" 
-                    />
+                    <Input value={item.title} onChange={(e) => handleLocalChange(collectionName, item.id, 'title', e.target.value)} onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'title', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100 h-9" />
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs mb-1 block">Icône (En anglais ex: Key, Lock)</Label>
-                    <Input 
-                      value={item.icon} 
-                      onChange={(e) => handleLocalChange(collectionName, item.id, 'icon', e.target.value)}
-                      onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'icon', e.target.value)}
-                      className="bg-slate-900 border-slate-700 text-slate-100 h-9" 
-                    />
+                    <Label className="text-slate-400 text-xs mb-1 block">Icône</Label>
+                    <Input value={item.icon} onChange={(e) => handleLocalChange(collectionName, item.id, 'icon', e.target.value)} onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'icon', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100 h-9" />
                   </div>
                 </div>
                 <div>
                   <Label className="text-slate-400 text-xs mb-1 block">Description</Label>
-                  <Textarea 
-                    value={item.description} 
-                    onChange={(e) => handleLocalChange(collectionName, item.id, 'description', e.target.value)}
-                    onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'description', e.target.value)}
-                    className="bg-slate-900 border-slate-700 text-slate-100" 
-                    rows={2} 
-                  />
+                  <Textarea value={item.description} onChange={(e) => handleLocalChange(collectionName, item.id, 'description', e.target.value)} onBlur={(e) => handleSaveItemDB(collectionName, item.id, 'description', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100" rows={2} />
                 </div>
               </div>
             ))}
@@ -324,21 +310,69 @@ const AdminDashboard = () => {
           </Card>
 
           {/* ACCORDÉONS : SERVICES & HIGHLIGHTS */}
-          {renderDynamicList(
-            "Gestion des Services", 
-            "Ces éléments s'affichent sous forme de grandes cartes", 
-            "services", 
-            services,
-            "services"
-          )}
-          
-          {renderDynamicList(
-            "Points Forts (25 Ans d'Expérience)", 
-            "Ces éléments s'affichent au-dessus des avis", 
-            "highlights", 
-            highlights,
-            "highlights"
-          )}
+          {renderStandardList("Gestion des Services", "Ces éléments s'affichent sous forme de grandes cartes", "services", services, "services")}
+          {renderStandardList("Points Forts", "Ces éléments s'affichent au-dessus des avis", "highlights", highlights, "highlights")}
+
+          {/* 🟢 NOUVEL ACCORDÉON : AVIS CLIENTS */}
+          <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
+            <div 
+              className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
+              onClick={() => toggleSection('reviews')}
+            >
+              <div>
+                <CardTitle className="text-slate-100">Avis Clients</CardTitle>
+                <CardDescription className="text-slate-400 mt-1">Gérez les avis qui défilent sur la page d'accueil</CardDescription>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button onClick={(e) => handleAddItem(e, 'reviews')} size="sm" className="bg-amber-500 text-slate-950 hover:bg-amber-400 z-10 relative">
+                  <Plus className="h-4 w-4 mr-1" /> Ajouter
+                </Button>
+                <div className="text-slate-500">
+                  {expandedSections.reviews ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+                </div>
+              </div>
+            </div>
+            
+            {expandedSections.reviews && (
+              <CardContent className="space-y-4 pt-0">
+                <div className="border-t border-slate-800 pt-6">
+                  {reviews.map((review) => (
+                    <div key={review.id} className={`p-4 bg-slate-800/50 rounded-lg border relative group mb-4 transition-all ${review.visible === false ? 'border-slate-800 opacity-60' : 'border-slate-700'}`}>
+                      
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
+                        <Button onClick={() => handleToggleVisibility('reviews', review)} variant="ghost" size="icon" className={`${review.visible === false ? 'text-slate-500 hover:text-slate-300' : 'text-amber-500 hover:text-amber-400'} hover:bg-slate-700/50`} title={review.visible === false ? "Afficher" : "Masquer"}>
+                          {review.visible === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                        <Button onClick={() => handleDeleteItem('reviews', review.id)} variant="ghost" size="icon" className="text-red-400 hover:bg-red-400/20" title="Supprimer">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 pr-20">
+                        <div>
+                          <Label className="text-slate-400 text-xs mb-1 block">Auteur</Label>
+                          <Input value={review.author} onChange={(e) => handleLocalChange('reviews', review.id, 'author', e.target.value)} onBlur={(e) => handleSaveItemDB('reviews', review.id, 'author', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100 h-9" />
+                        </div>
+                        <div>
+                          <Label className="text-slate-400 text-xs mb-1 block">Note (sur 5)</Label>
+                          <Input type="number" min="1" max="5" value={review.rating} onChange={(e) => handleLocalChange('reviews', review.id, 'rating', parseInt(e.target.value) || 5)} onBlur={(e) => handleSaveItemDB('reviews', review.id, 'rating', parseInt(e.target.value) || 5)} className="bg-slate-900 border-slate-700 text-slate-100 h-9" />
+                        </div>
+                        <div>
+                          <Label className="text-slate-400 text-xs mb-1 block">Date (AAAA-MM-JJ)</Label>
+                          <Input value={review.date} onChange={(e) => handleLocalChange('reviews', review.id, 'date', e.target.value)} onBlur={(e) => handleSaveItemDB('reviews', review.id, 'date', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100 h-9" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-xs mb-1 block">Commentaire</Label>
+                        <Textarea value={review.text} onChange={(e) => handleLocalChange('reviews', review.id, 'text', e.target.value)} onBlur={(e) => handleSaveItemDB('reviews', review.id, 'text', e.target.value)} className="bg-slate-900 border-slate-700 text-slate-100" rows={3} />
+                      </div>
+                    </div>
+                  ))}
+                  {reviews.length === 0 && <p className="text-slate-500 italic text-center py-4">Aucun avis enregistré.</p>}
+                </div>
+              </CardContent>
+            )}
+          </Card>
 
         </main>
       </div>
