@@ -160,15 +160,15 @@ const HomePage = () => {
               {services.slice(0, 2).map((service, index) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
                 return (
-                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300">
-                    <CardContent className="p-8">
+                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                    <CardContent className="p-8 flex-1">
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-amber-500/10 rounded-xl">
+                        <div className="p-3 bg-amber-500/10 rounded-xl flex-shrink-0">
                           <IconComp className="h-8 w-8 text-amber-500" />
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-slate-100 mb-3">{service.title}</h3>
-                          <p className="text-slate-400 leading-relaxed">{service.description}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words">{service.title}</h3>
+                          <p className="text-slate-400 leading-relaxed break-words">{service.description}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -182,13 +182,13 @@ const HomePage = () => {
               {services.slice(2).map((service, index) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
                 return (
-                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300">
-                    <CardContent className="p-8">
+                  <Card key={index} className="bg-slate-900/50 border-slate-800 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                    <CardContent className="p-8 flex-1 flex flex-col">
                       <div className="p-3 bg-amber-500/10 rounded-xl w-fit mb-4">
                         <IconComp className="h-8 w-8 text-amber-500" />
                       </div>
-                      <h3 className="text-xl font-semibold text-slate-100 mb-3">{service.title}</h3>
-                      <p className="text-slate-400 leading-relaxed">{service.description}</p>
+                      <h3 className="text-xl font-semibold text-slate-100 mb-3 break-words">{service.title}</h3>
+                      <p className="text-slate-400 leading-relaxed break-words flex-1">{service.description}</p>
                     </CardContent>
                   </Card>
                 );
