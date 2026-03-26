@@ -18,6 +18,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { googleReviews } from '@/data/reviews';
 import { getRelativeTime } from '@/utils/dateUtils';
+import SEOSchema from '@/components/SEOSchema.jsx';
 
 const { X, Phone, Mail, Star, AlertTriangle, MapPin } = LucideIcons;
 
@@ -126,12 +127,17 @@ const HomePage = () => {
     <>
       <Helmet>
         <title>Serrurerie Roland - Serrurier Lyon 24/7</title>
+        <meta name="description" content="Intervention rapide 24h/24 et 7j/7 à Lyon et alentours. Serrurerie Roland : dépannage urgent, portes blindées et portes de garage. 25 ans d'expérience." />
         <style>{`
           @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
           .animate-marquee { animation: scrollRight 80s linear infinite; width: max-content; }
           .animate-marquee:hover { animation-play-state: paused; }
         `}</style>
       </Helmet>
+      
+      <SEOSchema />
+
+      <Header />
 
       <Header />
 
@@ -152,7 +158,7 @@ const HomePage = () => {
       <main>
         {/* ACCUEIL */}
         <section id="accueil" className="relative min-h-[100dvh] flex items-center justify-center py-32">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/fond-homepage.jpg)' }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/fond-homepage.webp)' }}>
             <div className="absolute inset-0 bg-slate-950/80"></div>
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
