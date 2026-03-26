@@ -17,7 +17,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import InitialLoader from './components/InitialLoader';
-import pb from '@/lib/pocketbaseClient'; // 🟢 Ajout pour requêter PocketBase
+import pb from '@/lib/pocketbaseClient'; 
 
 // 🟢 Convertisseur Hexadecimal vers RGB pour Tailwind
 const hexToRgb = (hex) => {
@@ -36,7 +36,7 @@ const hexToRgb = (hex) => {
   return `${r} ${g} ${b}`;
 };
 
-// 🟢 Injecteur de thème invisible (Requête la nouvelle collection)
+// 🟢 INJECTEUR DE THÈME INVISIBLE (C'est lui qui applique les couleurs !)
 const ThemeInjector = () => {
   useEffect(() => {
     const fetchTheme = async () => {
@@ -72,7 +72,8 @@ function App() {
   return (
     <AuthProvider>
       <BusinessInfoProvider>
-        {/* L'injecteur applique les couleurs */}
+        
+        {/* 🟢 On place l'injecteur ici pour qu'il colore le site dès le chargement */}
         <ThemeInjector />
 
         {isLoading ? (

@@ -1,7 +1,14 @@
-/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 🟢 AJOUTE CE BLOC ICI : Variables de base au cas où la base de données ne répond pas */
+:root {
+  --color-primary: 245 158 11;       /* f59e0b (amber-500) */
+  --color-primary-hover: 251 191 36; /* fbbf24 (amber-400) */
+  --color-bg-main: 2 6 23;           /* 020617 (slate-950) */
+  --color-bg-card: 15 23 42;         /* 0f172a (slate-900) */
+}
 
 /* 🟢 1. Layout du chargement */
 .initial-loader-container {

@@ -17,29 +17,26 @@ module.exports = {
     },
     extend: {
       colors: {
-        // 🟠 TA COULEUR PRINCIPALE (Actuellement Orange/Amber)
-        // Modifie ces 2 codes HEX pour changer la couleur de tes boutons, icônes, textes en surbrillance...
+        // 🟢 C'est ici la magie : Tailwind écoute maintenant la base de données !
         amber: {
-          400: "#fbbf24", // Couleur au survol de la souris
-          500: "#f59e0b", // COULEUR PRINCIPALE
+          400: "rgb(var(--color-primary-hover) / <alpha-value>)",
+          500: "rgb(var(--color-primary) / <alpha-value>)",
         },
-        
-        // 🌑 TON THÈME SOMBRE (Actuellement Bleu-Gris/Slate)
-        // Modifie ces codes pour changer la teinte sombre de ton site
         slate: {
-          100: "#f1f5f9", // Texte principal (très clair)
+          100: "#f1f5f9",
           200: "#e2e8f0", 
-          300: "#cbd5e1", // Paragraphes normaux
-          400: "#94a3b8", // Petits textes discrets
+          300: "#cbd5e1",
+          400: "#94a3b8",
           500: "#64748b",
           600: "#475569",
           700: "#334155",
-          800: "#1e293b", // Bordures et petites cartes
-          900: "#0f172a", // Fond des sections secondaires (ex: Contact, Footer)
-          950: "#020617", // FOND PRINCIPAL DU SITE
+          800: "#1e293b",
+          // 🟢 Écoute de la base de données pour les fonds sombres
+          900: "rgb(var(--color-bg-card) / <alpha-value>)",
+          950: "rgb(var(--color-bg-main) / <alpha-value>)",
         },
 
-        // --- Couleurs de ton système UI existant ---
+        // --- Couleurs de ton système UI ---
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -91,20 +88,12 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
