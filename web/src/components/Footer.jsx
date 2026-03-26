@@ -1,6 +1,7 @@
 import React from 'react';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
+import { Link } from 'react-router-dom'; // 🟢 Ajout de l'import Link
 
 const Footer = () => {
   const { businessInfo } = useBusinessInfo();
@@ -58,12 +59,13 @@ const Footer = () => {
               © {new Date().getFullYear()} Serrurerie Roland. Tous droits réservés.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-sm text-slate-500 hover:text-amber-500 transition-colors duration-200">
+              {/* 🟢 Utilisation de Link au lieu de a href="#" */}
+              <Link to="/mentions-legales" className="text-sm text-slate-500 hover:text-amber-500 transition-colors duration-200">
                 Mentions Légales
-              </a>
-              <a href="#" className="text-sm text-slate-500 hover:text-amber-500 transition-colors duration-200">
+              </Link>
+              <Link to="/mentions-legales" className="text-sm text-slate-500 hover:text-amber-500 transition-colors duration-200">
                 Politique de Confidentialité
-              </a>
+              </Link>
             </div>
           </div>
         </div>
