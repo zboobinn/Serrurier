@@ -19,7 +19,6 @@ import 'leaflet/dist/leaflet.css';
 import { googleReviews } from '@/data/reviews';
 import { getRelativeTime } from '@/utils/dateUtils';
 
-// 🟢 J'ai ajouté MapPin ici pour ton nouveau bloc d'intervention
 const { X, Phone, Mail, Star, AlertTriangle, MapPin } = LucideIcons;
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -45,7 +44,8 @@ const fallbackHighlights = [
 ];
 
 const HomePage = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  // 🟢 Ajout du champ "need" (besoin) dans l'état du formulaire
+  const [formData, setFormData] = useState({ name: '', email: '', need: '', message: '' });
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -53,7 +53,6 @@ const HomePage = () => {
   const { businessInfo } = useBusinessInfo();
   const [bannerVisible, setBannerVisible] = useState(true);
 
-  // States pour les données dynamiques de PocketBase
   const [services, setServices] = useState(fallbackServices);
   const [highlights, setHighlights] = useState(fallbackHighlights);
   const [reviews, setReviews] = useState(googleReviews);
@@ -67,7 +66,6 @@ const HomePage = () => {
           pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false })
         ]);
 
-        // On ne garde que ceux qui sont visibles
         const visibleServices = servicesData.filter(s => s.visible !== false);
         const visibleHighlights = highlightsData.filter(h => h.visible !== false);
         const visibleReviews = reviewsData.filter(r => r.visible !== false);
@@ -93,10 +91,18 @@ const HomePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError(''); setSuccess(false);
+    
     try {
-      await pb.collection('contact_messages').create(formData, { $autoCancel: false });
+      // 🟢 L'ASTUCE : On fusionne le choix du menu déroulant avec le message
+      const finalData = {
+        name: formData.name,
+        email: formData.email,
+        message: `[Besoin : ${formData.need}]\n\n${formData.message}`
+      };
+
+      await pb.collection('contact_messages').create(finalData, { $autoCancel: false });
       setSuccess(true);
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', need: '', message: '' });
     } catch (err) { setError('Erreur d\'envoi.'); } 
     finally { setLoading(false); }
   };
@@ -112,7 +118,7 @@ const HomePage = () => {
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
-      }, 150); // Petit délai pour laisser React afficher la page
+      }, 150);
     }
   }, [location.hash]);
 
@@ -172,7 +178,6 @@ const HomePage = () => {
               </p>
             </div>
 
-            {/* Les 2 premières cartes (Design horizontal) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {services.slice(0, 2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
@@ -209,7 +214,6 @@ const HomePage = () => {
               })}
             </div>
 
-            {/* Le reste des cartes (Design vertical) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {services.slice(2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
@@ -300,7 +304,7 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* 🟢 NOUVELLE SECTION MAP & ZONE D'INTERVENTION 🟢 */}
+        {/* ZONE D'INTERVENTION */}
         <section id="zone-intervention" className="py-20 bg-slate-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -311,7 +315,6 @@ const HomePage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* LA CARTE (À GAUCHE) */}
               <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 h-[400px] md:h-[500px] shadow-xl">
                 <MapContainer center={position} zoom={11} style={{ height: '100%', width: '100%' }}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -320,7 +323,6 @@ const HomePage = () => {
                 </MapContainer>
               </div>
 
-              {/* LE TEXTE (À DROITE) */}
               <div className="space-y-6">
                 <h3 className="text-2xl font-bold text-slate-100">Disponibilité immédiate dans le Grand Lyon</h3>
                 <div className="space-y-4 text-slate-300 leading-relaxed">
@@ -360,6 +362,23 @@ const HomePage = () => {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <Input placeholder="Nom" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="bg-slate-800 border-slate-700 text-slate-100" />
                     <Input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required className="bg-slate-800 border-slate-700 text-slate-100" />
+                    
+                    {/* 🟢 LE NOUVEAU MENU DÉROULANT POUR LE BESOIN */}
+                    <select
+                      value={formData.need}
+                      onChange={(e) => setFormData({...formData, need: e.target.value})}
+                      required
+                      className="flex h-10 w-full rounded-md bg-slate-800 border border-slate-700 text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    >
+                      <option value="" disabled>Quel est votre besoin ?</option>
+                      <option value="Urgence (Porte bloquée / Effraction)">Urgence (Porte bloquée / Effraction)</option>
+                      <option value="Projet d'installation">Projet d'installation</option>
+                      <option value="Réparation / Dépannage">Réparation / Dépannage</option>
+                      <option value="Demande de devis">Demande de devis</option>
+                      <option value="Conseils en sécurité">Conseils en sécurité</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+
                     <Textarea placeholder="Message" value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} required rows={5} className="bg-slate-800 border-slate-700 text-slate-100" />
                     {error && <p className="text-red-500">{error}</p>}
                     <Button type="submit" disabled={loading} className="w-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all active:scale-95">{loading ? 'Envoi...' : 'Envoyer le message'}</Button>
