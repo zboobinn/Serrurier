@@ -7,10 +7,11 @@ import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import ServicePage from './pages/ServicePage';
-import GarageDoorsPage from './pages/GarageDoorsPage';
-import ArmoredDoorsPage from './pages/ArmoredDoorsPage';
-import LegalNoticePage from './pages/LegalNoticePage';
-import EmergencyPage from './pages/EmergencyPage';
+import GarageDoorsPage from './pages/PorteGaragePage';
+import ArmoredDoorsPage from './pages/PorteBlindeePage';
+import LegalNoticePage from './pages/MentionsLegalesPage';
+import EmergencyPage from './pages/DepannageUrgentPage';
+import MetalShuttersPage from './pages/RideauxMetalPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -46,6 +47,7 @@ function App() {
                 <Route path="/services/portes-de-garage" element={<GarageDoorsPage />} />
                 <Route path="/services/portes-blindees" element={<ArmoredDoorsPage />} />
                 <Route path="/services/depannage-urgent" element={<EmergencyPage />} />
+                <Route path="/services/rideaux-metalliques" element={<MetalShuttersPage />} />
                 <Route path="/mentions-legales" element={<LegalNoticePage />} />
                 <Route
                   path="/admin"

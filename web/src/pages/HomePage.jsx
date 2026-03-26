@@ -195,6 +195,8 @@ const HomePage = () => {
                   linkUrl = '/services/portes-blindees';
                 } else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) {
                   linkUrl = '/services/depannage-urgent';
+                } else if (service.title.includes('Rideau') || service.title.includes('Métallique')) {
+                  linkUrl = '/services/rideaux-metalliques';
                 }
 
                 return (
@@ -231,6 +233,8 @@ const HomePage = () => {
                   linkUrl = '/services/portes-blindees';
                 } else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) {
                   linkUrl = '/services/depannage-urgent';
+                } else if (service.title.includes('Rideau') || service.title.includes('Métallique')) {
+                  linkUrl = '/services/rideaux-metalliques';
                 }
 
                 return (
