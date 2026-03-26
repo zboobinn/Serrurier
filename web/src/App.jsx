@@ -16,26 +16,65 @@ import VitreriePage from './pages/VitreriePage';
 import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import InitialLoader from './components/InitialLoader';
+import pb from '@/lib/pocketbaseClient'; // 🟢 Ajout pour requêter PocketBase
 
-// 🟢 On importe notre nouveau composant
-import InitialLoader from './components/InitialLoader'; 
+// 🟢 Convertisseur Hexadecimal vers RGB pour Tailwind
+const hexToRgb = (hex) => {
+  if (!hex) return null;
+  hex = hex.replace('#', '');
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16);
+    g = parseInt(hex[1] + hex[1], 16);
+    b = parseInt(hex[2] + hex[2], 16);
+  } else if (hex.length === 6) {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  }
+  return `${r} ${g} ${b}`;
+};
+
+// 🟢 Injecteur de thème invisible (Requête la nouvelle collection)
+const ThemeInjector = () => {
+  useEffect(() => {
+    const fetchTheme = async () => {
+      try {
+        const records = await pb.collection('theme_settings').getFullList({ $autoCancel: false });
+        if (records.length > 0) {
+          const theme = records[0];
+          const root = document.documentElement;
+
+          if (theme.color_primary) root.style.setProperty('--color-primary', hexToRgb(theme.color_primary));
+          if (theme.color_primary_hover) root.style.setProperty('--color-primary-hover', hexToRgb(theme.color_primary_hover));
+          if (theme.color_bg_main) root.style.setProperty('--color-bg-main', hexToRgb(theme.color_bg_main));
+          if (theme.color_bg_card) root.style.setProperty('--color-bg-card', hexToRgb(theme.color_bg_card));
+        }
+      } catch (error) {
+        console.error("Thème non chargé", error);
+      }
+    };
+    fetchTheme();
+  }, []);
+
+  return null;
+};
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
+    const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <AuthProvider>
       <BusinessInfoProvider>
-        
-        {/* 🟢 Le code est maintenant beaucoup plus propre ici */}
+        {/* L'injecteur applique les couleurs */}
+        <ThemeInjector />
+
         {isLoading ? (
           <InitialLoader /> 
         ) : (
@@ -51,21 +90,13 @@ function App() {
                 <Route path="/services/rideaux-metalliques" element={<MetalShuttersPage />} />
                 <Route path="/services/vitrerie" element={<VitreriePage />} />
                 <Route path="/mentions-legales" element={<LegalNoticePage />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               </Routes>
             </BrowserRouter>
             <FloatingCallButton />
             <Toaster position="top-right" richColors />
           </div>
         )}
-
       </BusinessInfoProvider>
     </AuthProvider>
   );

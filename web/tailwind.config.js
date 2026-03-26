@@ -17,6 +17,29 @@ module.exports = {
     },
     extend: {
       colors: {
+        // 🟠 TA COULEUR PRINCIPALE (Actuellement Orange/Amber)
+        // Modifie ces 2 codes HEX pour changer la couleur de tes boutons, icônes, textes en surbrillance...
+        amber: {
+          400: "#fbbf24", // Couleur au survol de la souris
+          500: "#f59e0b", // COULEUR PRINCIPALE
+        },
+        
+        // 🌑 TON THÈME SOMBRE (Actuellement Bleu-Gris/Slate)
+        // Modifie ces codes pour changer la teinte sombre de ton site
+        slate: {
+          100: "#f1f5f9", // Texte principal (très clair)
+          200: "#e2e8f0", 
+          300: "#cbd5e1", // Paragraphes normaux
+          400: "#94a3b8", // Petits textes discrets
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b", // Bordures et petites cartes
+          900: "#0f172a", // Fond des sections secondaires (ex: Contact, Footer)
+          950: "#020617", // FOND PRINCIPAL DU SITE
+        },
+
+        // --- Couleurs de ton système UI existant ---
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
