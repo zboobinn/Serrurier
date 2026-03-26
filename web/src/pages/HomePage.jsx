@@ -197,6 +197,8 @@ const HomePage = () => {
                   linkUrl = '/services/depannage-urgent';
                 } else if (service.title.includes('Rideau') || service.title.includes('Métallique')) {
                   linkUrl = '/services/rideaux-metalliques';
+                } else if (service.title.includes('Vitrerie') || service.title.includes('Vitre')) { 
+                  linkUrl = '/services/vitrerie'; 
                 }
 
                 return (
@@ -235,6 +237,8 @@ const HomePage = () => {
                   linkUrl = '/services/depannage-urgent';
                 } else if (service.title.includes('Rideau') || service.title.includes('Métallique')) {
                   linkUrl = '/services/rideaux-metalliques';
+                } else if (service.title.includes('Vitrerie') || service.title.includes('Vitre')) {
+                  linkUrl = '/services/vitrerie';
                 }
 
                 return (

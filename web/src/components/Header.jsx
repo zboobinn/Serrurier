@@ -118,6 +118,8 @@ const Header = () => {
                         linkUrl = '/services/depannage-urgent';
                       } else if (s.title.includes('Rideau')) {
                         linkUrl = '/services/rideaux-metalliques';
+                      } else if (s.title.includes('Vitrerie') || s.title.includes('Vitre')) { // 🟢 Ajoute cette ligne
+                        linkUrl = '/services/vitrerie'; // 🟢 Ajoute cette ligne
                       }
 
                       return (
@@ -173,6 +175,8 @@ const Header = () => {
                     linkUrl = '/services/depannage-urgent';
                   } else if (s.title.includes('Rideau')) { 
                     linkUrl = '/services/rideaux-metalliques';
+                  } else if (s.title.includes('Vitrerie') || s.title.includes('Vitre')) {
+                    linkUrl = '/services/vitrerie'; 
                   }
 
                   return (

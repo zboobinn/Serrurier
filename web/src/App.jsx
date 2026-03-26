@@ -12,6 +12,7 @@ import ArmoredDoorsPage from './pages/PorteBlindeePage';
 import LegalNoticePage from './pages/MentionsLegalesPage';
 import EmergencyPage from './pages/DepannageUrgentPage';
 import MetalShuttersPage from './pages/RideauxMetalPage';
+import VitreriePage from './pages/VitreriePage';
 import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/services/portes-blindees" element={<ArmoredDoorsPage />} />
                 <Route path="/services/depannage-urgent" element={<EmergencyPage />} />
                 <Route path="/services/rideaux-metalliques" element={<MetalShuttersPage />} />
+                <Route path="/services/vitrerie" element={<VitreriePage />} />
                 <Route path="/mentions-legales" element={<LegalNoticePage />} />
                 <Route
                   path="/admin"
