@@ -280,7 +280,7 @@ const HomePage = () => {
             {/* AVIS */}
             <div className="border-t border-slate-800 pt-16">
               <div className="text-center mb-12"><h2 className="text-3xl font-semibold text-slate-100">Ce que disent nos clients</h2></div>
-              <div className="relative w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+              <div className="relative w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
                 <div className="flex gap-6 animate-marquee py-4">
                   {scrollingReviews.map((review, index) => (
                     <Card key={`${review.id}-${index}`} className="w-[500px] shrink-0 bg-slate-950 border-slate-800">
