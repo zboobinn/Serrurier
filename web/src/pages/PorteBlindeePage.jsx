@@ -41,7 +41,7 @@ const ArmoredDoorsPage = () => {
 
       <Header />
 
-      <main className="min-h-screen bg-slate-950 pt-24">
+      <main className="min-h-screen bg-slate-950">
         {/* HERO SECTION */}
         <section className="relative py-24 md:py-32 overflow-hidden">
           {/* Image de fond avec calque sombre à 85% */}
