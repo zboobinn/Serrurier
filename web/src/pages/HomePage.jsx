@@ -10,10 +10,10 @@ import pb from '@/lib/pocketbaseClient';
 import { googleReviews } from '@/data/reviews';
 
 // Import de nos nouveaux composants de page d'accueil
-import HeroSection from '@/components/home/HeroSection.jsx';
+import HeroSection from '@/components/home/AccueilSection.jsx';
 import ServicesSection from '@/components/home/ServicesSection.jsx';
-import InterventionZoneSection from '@/components/home/InterventionZoneSection.jsx';
-import AboutSection from '@/components/home/AboutSection.jsx';
+import InterventionZoneSection from '@/components/home/ZoneInterventionSection.jsx';
+import AboutSection from '@/components/home/AProposSection.jsx';
 import ContactSection from '@/components/home/ContactSection.jsx';
 
 // 🟢 J'ai mis à jour tes 5 services par défaut
