@@ -22,10 +22,11 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // 🟢 L'ordre du menu est inversé ici
   const navLinks = [
     { id: 'accueil', label: 'Accueil' },
-    { id: 'apropos', label: 'À Propos' },
     { id: 'zone-intervention', label: 'Zone d\'Intervention' },
+    { id: 'apropos', label: 'À Propos' },
     { id: 'contact', label: 'Contact' }
   ];
 
@@ -51,7 +52,8 @@ const Header = () => {
       const scrollPosition = window.scrollY + 100;
       let currentSection = 'accueil';
 
-      const orderedSectionIds = ['accueil', 'services', 'apropos', 'zone-intervention', 'contact'];
+      // 🟢 L'ordre de détection du scroll est inversé ici
+      const orderedSectionIds = ['accueil', 'services', 'zone-intervention', 'apropos', 'contact'];
       const sectionsElements = orderedSectionIds.map(id => document.getElementById(id));
 
       for (let i = sectionsElements.length - 1; i >= 0; i--) {
@@ -92,7 +94,6 @@ const Header = () => {
             <h1 className="text-2xl font-bold text-amber-500">Serrurerie Roland</h1>
           </div>
 
-          {/* 🟢 CHANGEMENT ICI : hidden lg:flex au lieu de hidden md:flex */}
           <nav className="hidden lg:flex items-center gap-6">
             <button onClick={() => scrollToSection('accueil')} className={`text-sm font-medium transition-colors duration-200 relative ${activeSection === 'accueil' ? 'text-amber-500' : 'text-slate-300 hover:text-amber-500'}`}>
               Accueil
@@ -118,8 +119,8 @@ const Header = () => {
                         linkUrl = '/services/depannage-urgent';
                       } else if (s.title.includes('Rideau')) {
                         linkUrl = '/services/rideaux-metalliques';
-                      } else if (s.title.includes('Vitrerie') || s.title.includes('Vitre')) { // 🟢 Ajoute cette ligne
-                        linkUrl = '/services/vitrerie'; // 🟢 Ajoute cette ligne
+                      } else if (s.title.includes('Vitrerie') || s.title.includes('Vitre')) {
+                        linkUrl = '/services/vitrerie'; 
                       }
 
                       return (
@@ -141,7 +142,6 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* 🟢 CHANGEMENT ICI : hidden lg:flex */}
           <div className="hidden lg:flex items-center gap-4">
             <a href={`tel:${businessInfo?.phone?.replace(/\s/g, '') ?? '0668676565'}`} onClick={handlePhoneClick} className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-slate-950 rounded-xl font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]">
               <Phone className="h-4 w-4" />
@@ -149,14 +149,12 @@ const Header = () => {
             </a>
           </div>
 
-          {/* 🟢 CHANGEMENT ICI : lg:hidden au lieu de md:hidden */}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-slate-300 hover:text-amber-500">
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
-      {/* 🟢 CHANGEMENT ICI : lg:hidden */}
       {isMenuOpen && (
         <div className="lg:hidden bg-slate-900 border-t border-slate-800 max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
