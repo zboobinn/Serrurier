@@ -4,16 +4,25 @@ import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import pb from '@/lib/pocketbaseClient';
 
+// 🟢 Valeurs de secours pour éviter le menu vide au chargement
+const fallbackServices = [
+  { id: 'fb1', title: 'Dépannage Urgent 24/7' },
+  { id: 'fb2', title: 'Portes de Garage' },
+  { id: 'fb3', title: 'Portes Blindées' },
+  { id: 'fb4', title: 'Rideaux Métalliques' },
+  { id: 'fb5', title: 'Conseil en Sécurité' }
+];
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const [servicesList, setServicesList] = useState([]);
+  // 🟢 On initialise avec les valeurs de secours au lieu d'un tableau vide
+  const [servicesList, setServicesList] = useState(fallbackServices);
   const { businessInfo } = useBusinessInfo();
   
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Les liens classiques de la page d'accueil
   const navLinks = [
     { id: 'accueil', label: 'Accueil' },
     { id: 'apropos', label: 'À Propos' },
@@ -21,18 +30,19 @@ const Header = () => {
     { id: 'contact', label: 'Contact' }
   ];
 
-  // Récupérer les services pour le menu déroulant
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const records = await pb.collection('services').getFullList({ filter: 'visible != false', sort: 'created' });
-        setServicesList(records);
+        // 🟢 On remplace la liste uniquement si on trouve des données
+        if (records.length > 0) {
+          setServicesList(records);
+        }
       } catch (error) { console.error(error); }
     };
     fetchServices();
   }, []);
 
-  // Gérer la surbrillance au défilement (uniquement sur la page d'accueil)
   useEffect(() => {
     if (location.pathname !== '/') {
       setActiveSection('');
@@ -43,11 +53,9 @@ const Header = () => {
       const scrollPosition = window.scrollY + 100;
       let currentSection = 'accueil';
 
-      // ✅ L'ordre physique exact de tes sections sur la page (de haut en bas)
       const orderedSectionIds = ['accueil', 'services', 'apropos', 'zone-intervention', 'contact'];
       const sectionsElements = orderedSectionIds.map(id => document.getElementById(id));
 
-      // Le code vérifie de bas en haut
       for (let i = sectionsElements.length - 1; i >= 0; i--) {
         const section = sectionsElements[i];
         if (section && section.offsetTop <= scrollPosition) {
@@ -66,14 +74,11 @@ const Header = () => {
     try { await pb.collection('phone_clicks').create({ timestamp: new Date().toISOString() }, { $autoCancel: false }); } catch (error) {}
   };
 
-  // La fonction magique pour naviguer même si on n'est pas sur la page d'accueil
   const scrollToSection = (id) => {
     setIsMenuOpen(false);
     if (location.pathname !== '/') {
-      // Si on est sur une autre page, on retourne à l'accueil avec un #hash
       navigate(`/#${id}`);
     } else {
-      // Si on est déjà sur l'accueil, on glisse en douceur
       const element = document.getElementById(id);
       if (element) {
         window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
@@ -82,7 +87,7 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-slate-800">
+    <header className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/95 backdrop-blur-sm border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 cursor-pointer" onClick={() => scrollToSection('accueil')}>
@@ -95,29 +100,35 @@ const Header = () => {
               {activeSection === 'accueil' && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-500"></span>}
             </button>
 
-            {/* 🟢 LE MENU DÉROULANT DES SERVICES */}
             <div className="relative group">
-              <button onClick={() => scrollToSection('services')} className={`flex items-center gap-1 text-sm font-medium transition-colors duration-200 relative ${activeSection === 'services' || location.pathname.includes('/service/') ? 'text-amber-500' : 'text-slate-300 hover:text-amber-500'}`}>
+              <button onClick={() => scrollToSection('services')} className={`flex items-center gap-1 text-sm font-medium transition-colors duration-200 relative ${activeSection === 'services' || location.pathname.includes('/service/') || location.pathname.includes('/services/') ? 'text-amber-500' : 'text-slate-300 hover:text-amber-500'}`}>
                 Services <ChevronDown className="h-4 w-4" />
-                {(activeSection === 'services' || location.pathname.includes('/service/')) && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-500"></span>}
+                {(activeSection === 'services' || location.pathname.includes('/service/') || location.pathname.includes('/services/')) && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-500"></span>}
               </button>
               
               {/* Le sous-menu */}
-              <div className="absolute left-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
-                <div className="py-2">
-                  {servicesList.map(s => {
-                    // 🟢 L'astuce pour le menu
-                    let linkUrl = `/service/${s.id}`;
-                    if (s.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
+              {servicesList.length > 0 && (
+                <div className="absolute left-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                  <div className="py-2">
+                    {servicesList.map(s => {
+                      let linkUrl = `/service/${s.id}`;
+                      if (s.title.includes('Garage')) {
+                        linkUrl = '/services/portes-de-garage';
+                      } else if (s.title.includes('Blindée') || s.title.includes('Blindees') || s.title.includes('Blindee')) {
+                        linkUrl = '/services/portes-blindees';
+                      } else if (s.title.includes('Dépannage') || s.title.includes('Depannage') || s.title.includes('Urgent')) {
+                        linkUrl = '/services/depannage-urgent';
+                      }
 
-                    return (
-                      <Link key={s.id} to={linkUrl} className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-amber-500 transition-colors">
-                        {s.title}
-                      </Link>
-                    );
-                  })}
+                      return (
+                        <Link key={s.id} to={linkUrl} className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-amber-500 transition-colors">
+                          {s.title}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {navLinks.slice(1).map((link) => (
@@ -141,7 +152,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* MENU MOBILE */}
       {isMenuOpen && (
         <div className="md:hidden bg-slate-900 border-t border-slate-800 max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
@@ -151,9 +161,14 @@ const Header = () => {
               <p className="text-slate-500 text-xs uppercase font-semibold mb-3 tracking-wider">Nos Services</p>
               <div className="space-y-3">
                 {servicesList.map(s => {
-                  // 🟢 L'astuce pour le mobile
                   let linkUrl = `/service/${s.id}`;
-                  if (s.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
+                  if (s.title.includes('Garage')) {
+                    linkUrl = '/services/portes-de-garage';
+                  } else if (s.title.includes('Blindée') || s.title.includes('Blindees') || s.title.includes('Blindee')) {
+                    linkUrl = '/services/portes-blindees';
+                  } else if (s.title.includes('Dépannage') || s.title.includes('Depannage') || s.title.includes('Urgent')) {
+                    linkUrl = '/services/depannage-urgent';
+                  }
 
                   return (
                     <Link key={s.id} to={linkUrl} onClick={() => setIsMenuOpen(false)} className="block text-sm text-slate-300 hover:text-amber-500">

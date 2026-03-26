@@ -33,19 +33,20 @@ const GarageDoorsPage = () => {
           {/* EN-TÊTE DE LA PAGE */}
           <div className="text-center max-w-4xl mx-auto mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-slate-100 mb-6 leading-tight">
-              Portes de Garage sur-mesure à Lyon : <span className="text-amber-500">Sécurité, Esthétique et Fonctionnalité</span>
+              Portes de Garage sur-mesure : <span className="text-amber-500">Sécurité, Esthétique et Fonctionnalité</span>
             </h1>
             <p className="text-xl text-slate-400 leading-relaxed">
               À Lyon, Serrurerie Roland est votre expert en portes de garage, offrant une gamme complète de services, de la conception sur-mesure à l’installation. Que vous cherchiez une porte sectionnelle, coulissante ou basculante, nous avons la solution adaptée à vos besoins.
             </p>
           </div>
 
-          {/* EMPLACEMENT POUR TA PREMIÈRE GRANDE PHOTO */}
-          <div className="w-full h-64 md:h-96 bg-slate-800 rounded-3xl mb-16 border border-slate-700 flex items-center justify-center overflow-hidden">
-             {/* Pour mettre ta photo plus tard, remplace le <p> ci-dessous par :
-                <img src="/ta-photo-garage.jpg" alt="Porte de garage à Lyon" className="w-full h-full object-cover" />
-             */}
-             <p className="text-slate-500 font-medium">[ Emplacement pour une belle photo de porte de garage ]</p>
+          {/* 🟢 LA GRANDE PHOTO : Elle s'affiche maintenant ici */}
+          <div className="w-full h-64 md:h-96 bg-slate-800 rounded-3xl mb-16 border border-slate-700 overflow-hidden">
+             <img 
+               src="/porte-garage.jpg" 
+               alt="Installation d'une porte de garage sectionnelle à Lyon par Serrurerie Roland" 
+               className="w-full h-full object-cover" 
+             />
           </div>
 
           {/* SECTION 1 : POURQUOI NOUS CHOISIR */}
@@ -62,7 +63,7 @@ const GarageDoorsPage = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="h-6 w-6 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-slate-300"><strong className="text-slate-100">Matériaux de Premier Choix :</strong> Nos portes sont fabriquées en acier, aluminium ou PVC pour une durabilité et une protection optimales.</p>
+                  <p className="text-slate-300"><strong className="text-slate-100">Matériaux de Premier Choix :</strong> Nos portes sont fabriquées en acier, aluminium ou PVC pour une durabilité et une protection optimes.</p>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="h-6 w-6 text-amber-500 flex-shrink-0 mt-0.5" />

@@ -19,7 +19,8 @@ import 'leaflet/dist/leaflet.css';
 import { googleReviews } from '@/data/reviews';
 import { getRelativeTime } from '@/utils/dateUtils';
 
-const { X, Phone, Mail, Star, AlertTriangle } = LucideIcons;
+// 🟢 J'ai ajouté MapPin ici pour ton nouveau bloc d'intervention
+const { X, Phone, Mail, Star, AlertTriangle, MapPin } = LucideIcons;
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,17 +31,17 @@ L.Icon.Default.mergeOptions({
 
 // Valeurs de secours si la base de données est vide
 const fallbackServices = [
-  { icon: 'Clock', title: 'Dépannage Urgent 24/7', description: 'Intervention rapide à toute heure, jour et nuit, week-ends et jours fériés.' },
-  { icon: 'DoorOpen', title: 'Portes de Garage', description: 'Installation, réparation et motorisation de portes de garage. Tous types de mécanismes.' },
-  { icon: 'ShieldCheck', title: 'Portes Blindées', description: 'Pose et installation de portes blindées certifiées pour une sécurité maximale.' },
-  { icon: 'Lock', title: 'Rideaux Métalliques', description: 'Installation et dépannage de rideaux métalliques pour commerces et locaux professionnels.' },
-  { icon: 'Lightbulb', title: 'Conseil en Sécurité', description: 'Audit de sécurité et recommandations personnalisées.' }
+  { id: 'fb1', icon: 'Clock', title: 'Dépannage Urgent 24/7', description: 'Intervention rapide à toute heure, jour et nuit, week-ends et jours fériés.' },
+  { id: 'fb2', icon: 'DoorOpen', title: 'Portes de Garage', description: 'Installation, réparation et motorisation de portes de garage. Tous types de mécanismes.' },
+  { id: 'fb3', icon: 'ShieldCheck', title: 'Portes Blindées', description: 'Pose et installation de portes blindées certifiées pour une sécurité maximale.' },
+  { id: 'fb4', icon: 'Lock', title: 'Rideaux Métalliques', description: 'Installation et dépannage de rideaux métalliques pour commerces et locaux professionnels.' },
+  { id: 'fb5', icon: 'Lightbulb', title: 'Conseil en Sécurité', description: 'Audit de sécurité et recommandations personnalisées.' }
 ];
 
 const fallbackHighlights = [
-  { icon: 'CheckCircle2', title: 'Satisfaction Garantie', description: 'Travail soigné et garantie sur toutes nos interventions' },
-  { icon: 'FileText', title: 'Devis Gratuit', description: 'Estimation transparente avant toute intervention' },
-  { icon: 'Clock', title: 'Dépannage 24/7', description: 'Disponible à toute heure pour vos urgences' }
+  { id: 'hl1', icon: 'CheckCircle2', title: 'Satisfaction Garantie', description: 'Travail soigné et garantie sur toutes nos interventions' },
+  { id: 'hl2', icon: 'FileText', title: 'Devis Gratuit', description: 'Estimation transparente avant toute intervention' },
+  { id: 'hl3', icon: 'Clock', title: 'Dépannage 24/7', description: 'Disponible à toute heure pour vos urgences' }
 ];
 
 const HomePage = () => {
@@ -176,14 +177,16 @@ const HomePage = () => {
               {services.slice(0, 2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
                 
-                // 🟢 L'ASTUCE EST ICI : On personnalise le lien si c'est 'Garage'
                 let linkUrl = `/service/${service.id}`;
                 if (service.title.includes('Garage')) {
                   linkUrl = '/services/portes-de-garage';
+                } else if (service.title.includes('Blindée') || service.title.includes('Blindees') || service.title.includes('Blindee')) {
+                  linkUrl = '/services/portes-blindees';
+                } else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) {
+                  linkUrl = '/services/depannage-urgent';
                 }
 
                 return (
-                  // 🟢 On utilise la variable linkUrl ici
                   <Link to={linkUrl} key={service.id} className="block h-full group">
                     <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                       <CardContent className="p-8 flex-1">
@@ -211,14 +214,16 @@ const HomePage = () => {
               {services.slice(2).map((service) => {
                 const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
 
-                // 🟢 L'ASTUCE EST ICI AUSSI : On personnalise le lien si c'est 'Garage'
                 let linkUrl = `/service/${service.id}`;
                 if (service.title.includes('Garage')) {
                   linkUrl = '/services/portes-de-garage';
+                } else if (service.title.includes('Blindée') || service.title.includes('Blindees') || service.title.includes('Blindee')) {
+                  linkUrl = '/services/portes-blindees';
+                } else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) {
+                  linkUrl = '/services/depannage-urgent';
                 }
 
                 return (
-                  // 🟢 On utilise la variable linkUrl ici
                   <Link to={linkUrl} key={service.id} className="block h-full group">
                     <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                       <CardContent className="p-8 flex-1 flex flex-col">
@@ -295,16 +300,52 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* MAP */}
+        {/* 🟢 NOUVELLE SECTION MAP & ZONE D'INTERVENTION 🟢 */}
         <section id="zone-intervention" className="py-20 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12"><h2 className="text-3xl font-semibold text-slate-100">Zone d'Intervention</h2></div>
-            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 h-[500px]">
-              <MapContainer center={position} zoom={11} style={{ height: '100%', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Circle center={position} radius={interventionRadius} pathOptions={{ color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.2 }} />
-                <Marker position={position}><Popup>Serrurerie Roland</Popup></Marker>
-              </MapContainer>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-semibold text-slate-100 mb-4">Zone d'Intervention</h2>
+              <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                Intervention rapide sur Lyon et sa périphérie
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* LA CARTE (À GAUCHE) */}
+              <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 h-[400px] md:h-[500px] shadow-xl">
+                <MapContainer center={position} zoom={11} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <Circle center={position} radius={interventionRadius} pathOptions={{ color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.2 }} />
+                  <Marker position={position}><Popup>Serrurerie Roland</Popup></Marker>
+                </MapContainer>
+              </div>
+
+              {/* LE TEXTE (À DROITE) */}
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold text-slate-100">Disponibilité immédiate dans le Grand Lyon</h3>
+                <div className="space-y-4 text-slate-300 leading-relaxed">
+                  <p>
+                    Serrurerie Roland intervient rapidement pour toutes vos urgences et projets d'installation dans un rayon d'environ <strong>{businessInfo?.intervention_radius || 20} km</strong> autour de Lyon.
+                  </p>
+                  <p>
+                    Notre emplacement central et notre disponibilité 24h/24 et 7j/7 nous permettent de vous garantir un temps d'attente réduit, particulièrement lors de situations d'urgence (porte claquée, perte de clés, tentative d'effraction).
+                  </p>
+                </div>
+                
+                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mt-6">
+                  <h4 className="font-semibold text-amber-500 mb-4 flex items-center gap-2">
+                    <MapPin className="h-5 w-5" /> Communes principales desservies :
+                  </h4>
+                  <ul className="grid grid-cols-2 gap-3 text-sm text-slate-400">
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Lyon (tous arrondissements)</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Villeurbanne</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Vénissieux</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Bron</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Vaulx-en-Velin</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></div> Tassin-la-Demi-Lune</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
