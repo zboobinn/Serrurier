@@ -145,7 +145,7 @@ const HomePage = () => {
 
       <main>
         {/* ACCUEIL */}
-        <section id="accueil" className="relative min-h-screen flex items-center justify-center">
+        <section id="accueil" className="relative min-h-[100dvh] flex items-center justify-center py-32">
           <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/fond-homepage.jpg)' }}>
             <div className="absolute inset-0 bg-slate-950/80"></div>
           </div>

@@ -16,7 +16,6 @@ const fallbackServices = [
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  // 🟢 On initialise avec les valeurs de secours au lieu d'un tableau vide
   const [servicesList, setServicesList] = useState(fallbackServices);
   const { businessInfo } = useBusinessInfo();
   
@@ -34,7 +33,6 @@ const Header = () => {
     const fetchServices = async () => {
       try {
         const records = await pb.collection('services').getFullList({ filter: 'visible != false', sort: 'created' });
-        // 🟢 On remplace la liste uniquement si on trouve des données
         if (records.length > 0) {
           setServicesList(records);
         }
@@ -94,7 +92,8 @@ const Header = () => {
             <h1 className="text-2xl font-bold text-amber-500">Serrurerie Roland</h1>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8">
+          {/* 🟢 CHANGEMENT ICI : hidden lg:flex au lieu de hidden md:flex */}
+          <nav className="hidden lg:flex items-center gap-6">
             <button onClick={() => scrollToSection('accueil')} className={`text-sm font-medium transition-colors duration-200 relative ${activeSection === 'accueil' ? 'text-amber-500' : 'text-slate-300 hover:text-amber-500'}`}>
               Accueil
               {activeSection === 'accueil' && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-500"></span>}
@@ -106,7 +105,6 @@ const Header = () => {
                 {(activeSection === 'services' || location.pathname.includes('/service/') || location.pathname.includes('/services/')) && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-500"></span>}
               </button>
               
-              {/* Le sous-menu */}
               {servicesList.length > 0 && (
                 <div className="absolute left-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
                   <div className="py-2">
@@ -139,21 +137,24 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          {/* 🟢 CHANGEMENT ICI : hidden lg:flex */}
+          <div className="hidden lg:flex items-center gap-4">
             <a href={`tel:${businessInfo?.phone?.replace(/\s/g, '') ?? '0668676565'}`} onClick={handlePhoneClick} className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-slate-950 rounded-xl font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98]">
               <Phone className="h-4 w-4" />
               <span>{businessInfo?.phone ?? '06 68 67 65 65'}</span>
             </a>
           </div>
 
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-slate-300 hover:text-amber-500">
+          {/* 🟢 CHANGEMENT ICI : lg:hidden au lieu de md:hidden */}
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-slate-300 hover:text-amber-500">
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
+      {/* 🟢 CHANGEMENT ICI : lg:hidden */}
       {isMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-t border-slate-800 max-h-[80vh] overflow-y-auto">
+        <div className="lg:hidden bg-slate-900 border-t border-slate-800 max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
             <button onClick={() => scrollToSection('accueil')} className="block w-full text-left px-4 py-2 text-slate-300 hover:text-amber-500">Accueil</button>
             
