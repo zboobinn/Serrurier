@@ -45,7 +45,7 @@ const GarageDoorsPage = () => {
         {/* HERO SECTION */}
         <section className="relative py-24 md:py-32 overflow-hidden">
           {/* Image de fond avec calque sombre à 85% */}
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/porte-garage.webp)' }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/PorteGarage1.webp)' }}>
             <div className="absolute inset-0 bg-slate-950/85"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent"></div>
           </div>
@@ -100,8 +100,8 @@ const GarageDoorsPage = () => {
               <div className="relative">
                 <div className="w-full h-[500px] bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden">
                   <img 
-                    src="/fond-homepage.webp" 
-                    alt="Installation d'une porte de garage à Lyon" 
+                    src="/PorteGarage2.webp" 
+                    alt="Installation d'une porte de garage à Lyon par Serrurerie Roland" 
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500">[Photo Porte de Garage]</div>'; }}
                   />

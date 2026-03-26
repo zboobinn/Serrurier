@@ -100,7 +100,7 @@ const EmergencyPage = () => {
               <div className="relative">
                 <div className="w-full h-[500px] bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden">
                   <img 
-                    src="/depannage.webp" 
+                    src="/DepannageUrgent2.webp" 
                     alt="Serrurier dépannage d'urgence à Lyon" 
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500">[Photo Dépannage Urgence]</div>'; }}

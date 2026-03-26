@@ -45,7 +45,7 @@ const MetalShuttersPage = () => {
         {/* HERO SECTION */}
         <section className="relative py-24 md:py-32 overflow-hidden">
           {/* Image de fond avec calque sombre à 85% */}
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/rideau-metallique.webp)' }}>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/RideauxMetal1.webp)' }}>
             <div className="absolute inset-0 bg-slate-950/85"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent"></div>
           </div>
@@ -98,12 +98,16 @@ const MetalShuttersPage = () => {
                 </div>
               </div>
               <div className="relative">
-                <img 
-                  src="/rideau-metallique.webp" 
-                  alt="Installation de rideau métallique à Lyon" 
-                  className="rounded-3xl shadow-2xl border border-slate-800"
-                />
-                <div className="absolute -bottom-6 -right-6 bg-amber-500 p-8 rounded-2xl hidden md:block">
+                {/* 🟢 C'est ici que j'ai uniformisé la structure de l'image */}
+                <div className="w-full h-[500px] bg-slate-800 rounded-3xl border border-slate-700 overflow-hidden">
+                  <img 
+                    src="/RideauxMetal2.webp" 
+                    alt="Installation de rideau métallique à Lyon" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500">[Photo Rideau Métallique]</div>'; }}
+                  />
+                </div>
+                <div className="absolute -bottom-6 -right-6 bg-amber-500 p-8 rounded-2xl hidden md:block shadow-xl">
                   <p className="text-slate-950 font-bold text-4xl">20+</p>
                   <p className="text-slate-950 font-medium">ans d'expérience</p>
                 </div>
@@ -170,7 +174,8 @@ const MetalShuttersPage = () => {
                     className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-900/50 transition-colors"
                   >
                     <span className="font-semibold text-slate-100 pr-4">{faq.q}</span>
-                    {openFaq === index ? <ChevronUp className="h-5 w-5 text-amber-500" /> : <ChevronDown className="h-5 w-5 text-slate-500" />}
+                    {/* 🟢 Ajout de flex-shrink-0 ici */}
+                    {openFaq === index ? <ChevronUp className="h-5 w-5 text-amber-500 flex-shrink-0" /> : <ChevronDown className="h-5 w-5 text-slate-500 flex-shrink-0" />}
                   </button>
                   {openFaq === index && (
                     <div className="px-6 pb-6 text-slate-400 animate-in slide-in-from-top-2 duration-200">

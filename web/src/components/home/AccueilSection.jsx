@@ -7,7 +7,7 @@ const HeroSection = () => {
 
   return (
     <section id="accueil" className="relative min-h-[100dvh] flex items-center justify-center py-32">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/fond-homepage.webp)' }}>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/FondAccueil.webp)' }}>
         <div className="absolute inset-0 bg-slate-950/80"></div>
       </div>
       <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
