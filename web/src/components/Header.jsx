@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
-// 🟢 Valeurs de secours pour éviter le menu vide au chargement
 const fallbackServices = [
   { id: 'fb1', title: 'Dépannage Urgent 24/7' },
   { id: 'fb2', title: 'Portes de Garage' },
@@ -22,7 +21,6 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🟢 L'ordre du menu est inversé ici
   const navLinks = [
     { id: 'accueil', label: 'Accueil' },
     { id: 'zone-intervention', label: 'Zone d\'Intervention' },
@@ -33,8 +31,12 @@ const Header = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const records = await pb.collection('services').getFullList({ filter: 'visible != false', sort: 'created' });
-        if (records.length > 0) {
+        const { data: records, error } = await supabase
+          .from('services')
+          .select('*')
+          .neq('visible', false);
+          
+        if (records && records.length > 0) {
           setServicesList(records);
         }
       } catch (error) { console.error(error); }
@@ -52,7 +54,6 @@ const Header = () => {
       const scrollPosition = window.scrollY + 100;
       let currentSection = 'accueil';
 
-      // 🟢 L'ordre de détection du scroll est inversé ici
       const orderedSectionIds = ['accueil', 'services', 'zone-intervention', 'apropos', 'contact'];
       const sectionsElements = orderedSectionIds.map(id => document.getElementById(id));
 
@@ -71,7 +72,7 @@ const Header = () => {
   }, [location]);
 
   const handlePhoneClick = async () => {
-    try { await pb.collection('phone_clicks').create({ timestamp: new Date().toISOString() }, { $autoCancel: false }); } catch (error) {}
+    try { await supabase.from('phone_clicks').insert([{}]); } catch (error) {}
   };
 
   const scrollToSection = (id) => {

@@ -14,12 +14,30 @@ export const BusinessInfoProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchBusinessInfo = async () => {
-      const { data, error } = await supabase
-        .from('business_info')
-        .select('*')
-        .single(); // On récupère la seule ligne de configuration
-
-      if (data) setBusinessInfo(data);
+      try {
+        const { data: records, error } = await supabase.from('business_info').select('*');
+        if (records && records.length > 0) {
+          setBusinessInfo(records[0]);
+        } else {
+          setBusinessInfo({
+            address: '62 rue Racine\n69100 Villeurbanne',
+            phone: '06 68 67 65 65',
+            email: 'serrurerieroland@orange.fr',
+            closure_message: ''
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch business info:', err);
+        setError(err);
+        setBusinessInfo({
+          address: '62 rue Racine\n69100 Villeurbanne',
+          phone: '06 68 67 65 65',
+          email: 'serrurerieroland@orange.fr',
+          closure_message: ''
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchBusinessInfo();

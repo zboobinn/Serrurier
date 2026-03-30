@@ -8,11 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { LogOut, Edit2, Save, X, MessageSquare, Phone, Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Palette, Undo } from 'lucide-react';
-import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import { toast } from 'sonner';
 
-// Convertisseur pour l'aperçu en direct
 const hexToRgb = (hex) => {
   if (!hex) return null;
   hex = hex.replace('#', '');
@@ -27,22 +26,15 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  // States pour les accordéons
   const [expandedSections, setExpandedSections] = useState({
-    info: true,
-    theme: false,
-    services: false,
-    highlights: false,
-    reviews: false
+    info: true, theme: false, services: false, highlights: false, reviews: false
   });
 
-  // States Infos & Thème
   const [businessInfo, setBusinessInfo] = useState(null);
   const [themeSettings, setThemeSettings] = useState(null);
   const [editMode, setEditMode] = useState({});
   const [editValues, setEditValues] = useState({});
 
-  // States Statistiques & Collections
   const [stats, setStats] = useState({ messages: 0, phoneClicks: 0, siteVisits: 0, siteVisitsToday: 0 });
   const [services, setServices] = useState([]);
   const [highlights, setHighlights] = useState([]);
@@ -52,44 +44,53 @@ const AdminDashboard = () => {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const startOfDay = today.toISOString().replace('T', ' '); 
+      const startOfDay = today.toISOString();
 
-      const [infoRes, themeRes, servicesRes, highlightsRes, reviewsRes, messagesRes, phoneRes, visitsRes, todayVisitsRes] = await Promise.all([
-        pb.collection('business_info').getFullList({ $autoCancel: false }),
-        pb.collection('theme_settings').getFullList({ $autoCancel: false }),
-        pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
-        pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
-        pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false }),
-        pb.collection('contact_messages').getList(1, 1, { $autoCancel: false }),
-        pb.collection('phone_clicks').getList(1, 1, { $autoCancel: false }),
-        pb.collection('site_visits').getList(1, 1, { $autoCancel: false }),
-        pb.collection('site_visits').getList(1, 1, { filter: `created >= "${startOfDay}"`, $autoCancel: false })
+      const [
+        infoRes, themeRes, servicesRes, highlightsRes, reviewsRes,
+        { count: messagesCount }, { count: phoneCount }, { count: visitsCount }, { count: todayVisitsCount }
+      ] = await Promise.all([
+        supabase.from('business_info').select('*'),
+        supabase.from('theme_settings').select('*'),
+        supabase.from('services').select('*'),
+        supabase.from('highlights').select('*'),
+        supabase.from('reviews').select('*'),
+        supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
+        supabase.from('phone_clicks').select('*', { count: 'exact', head: true }),
+        supabase.from('site_visits').select('*', { count: 'exact', head: true }),
+        supabase.from('site_visits').select('*', { count: 'exact', head: true }).gte('created_at', startOfDay)
       ]);
 
-      if (infoRes.length > 0) {
-        setBusinessInfo(infoRes[0]);
-        setEditValues(prev => ({ ...prev, ...infoRes[0] }));
+      const infoData = infoRes.data || [];
+      if (infoData.length > 0) {
+        setBusinessInfo(infoData[0]);
+        setEditValues(prev => ({ ...prev, ...infoData[0] }));
       }
 
-      if (themeRes.length > 0) {
-        setThemeSettings(themeRes[0]);
-        setEditValues(prev => ({ ...prev, ...themeRes[0] }));
+      const themeData = themeRes.data || [];
+      if (themeData.length > 0) {
+        setThemeSettings(themeData[0]);
+        setEditValues(prev => ({ ...prev, ...themeData[0] }));
       } else {
-        const defaultTheme = await pb.collection('theme_settings').create({
+        const { data: defaultTheme } = await supabase.from('theme_settings').insert([{
           color_primary: '#f59e0b', color_primary_hover: '#fbbf24',
           color_bg_main: '#020617', color_bg_card: '#0f172a'
-        }, { $autoCancel: false });
-        setThemeSettings(defaultTheme);
-        setEditValues(prev => ({ ...prev, ...defaultTheme }));
+        }]).select().single();
+        if (defaultTheme) {
+          setThemeSettings(defaultTheme);
+          setEditValues(prev => ({ ...prev, ...defaultTheme }));
+        }
       }
 
-      setServices(servicesRes);
-      setHighlights(highlightsRes);
-      setReviews(reviewsRes);
+      setServices(servicesRes.data || []);
+      setHighlights(highlightsRes.data || []);
+      setReviews(reviewsRes.data || []);
 
       setStats({
-        messages: messagesRes.totalItems, phoneClicks: phoneRes.totalItems,
-        siteVisits: visitsRes.totalItems, siteVisitsToday: todayVisitsRes.totalItems
+        messages: messagesCount || 0, 
+        phoneClicks: phoneCount || 0,
+        siteVisits: visitsCount || 0, 
+        siteVisitsToday: todayVisitsCount || 0
       });
     } catch (error) {
       toast.error('Erreur lors du chargement des données');
@@ -111,28 +112,25 @@ const AdminDashboard = () => {
   const handleCancelInfo = (field) => { setEditValues(prev => ({ ...prev, [field]: businessInfo[field] })); setEditMode(prev => ({ ...prev, [field]: false })); };
   const handleCancelTheme = (field) => { setEditValues(prev => ({ ...prev, [field]: themeSettings[field] })); setEditMode(prev => ({ ...prev, [field]: false })); };
 
-  // Sauvegarde des Infos Business
   const handleSaveInfo = async (field) => {
     try {
-      await pb.collection('business_info').update(businessInfo.id, { [field]: editValues[field] }, { $autoCancel: false });
+      await supabase.from('business_info').update({ [field]: editValues[field] }).eq('id', businessInfo.id);
       setBusinessInfo(prev => ({ ...prev, [field]: editValues[field] }));
       setEditMode(prev => ({ ...prev, [field]: false }));
       toast.success('Modifications enregistrées');
     } catch (error) { toast.error('Erreur lors de la sauvegarde'); }
   };
 
-  // 🟢 Sauvegarde du Thème (avec mémorisation de l'ancienne couleur)
   const handleSaveTheme = async (field) => {
     try {
       const oldColor = themeSettings[field];
       const newColor = editValues[field];
       const prevField = `prev_${field}`;
 
-      // On met à jour la couleur ET on stocke l'ancienne dans le champ "prev_"
-      await pb.collection('theme_settings').update(themeSettings.id, { 
+      await supabase.from('theme_settings').update({ 
         [field]: newColor,
         [prevField]: oldColor
-      }, { $autoCancel: false });
+      }).eq('id', themeSettings.id);
 
       setThemeSettings(prev => ({ ...prev, [field]: newColor, [prevField]: oldColor }));
       setEditMode(prev => ({ ...prev, [field]: false }));
@@ -142,17 +140,13 @@ const AdminDashboard = () => {
     } catch (error) { toast.error('Erreur lors de la sauvegarde'); }
   };
 
-  // 🟢 Restauration de l'ancienne couleur
   const handleRestoreTheme = async (field) => {
     const prevField = `prev_${field}`;
     const previousColor = themeSettings[prevField];
     if (!previousColor) return;
 
     try {
-      // On remet l'ancienne couleur
-      await pb.collection('theme_settings').update(themeSettings.id, { 
-        [field]: previousColor 
-      }, { $autoCancel: false });
+      await supabase.from('theme_settings').update({ [field]: previousColor }).eq('id', themeSettings.id);
 
       setThemeSettings(prev => ({ ...prev, [field]: previousColor }));
       setEditValues(prev => ({ ...prev, [field]: previousColor }));
@@ -162,7 +156,6 @@ const AdminDashboard = () => {
     } catch (error) { toast.error('Erreur lors de la restauration'); }
   };
 
-  // --- Gestion CRUD (Services, Highlights, Reviews) ---
   const handleAddItem = async (e, collection) => {
     e.stopPropagation();
     setExpandedSections(prev => ({...prev, [collection]: true}));
@@ -176,7 +169,8 @@ const AdminDashboard = () => {
         newItemData = { ...newItemData, title: 'Nouveau titre', description: 'Description...', icon: 'Wrench' };
       }
 
-      const newItem = await pb.collection(collection).create(newItemData, { $autoCancel: false });
+      const { data: newItem, error } = await supabase.from(collection).insert([newItemData]).select().single();
+      if (error) throw error;
 
       if (collection === 'services') setServices([...services, newItem]);
       else if (collection === 'highlights') setHighlights([...highlights, newItem]);
@@ -197,7 +191,7 @@ const AdminDashboard = () => {
 
   const handleSaveItemDB = async (collection, id, field, value) => {
     try {
-      await pb.collection(collection).update(id, { [field]: value }, { $autoCancel: false });
+      await supabase.from(collection).update({ [field]: value }).eq('id', id);
       toast.success('Sauvegardé');
     } catch (error) { toast.error('Erreur de synchronisation'); }
   };
@@ -206,7 +200,7 @@ const AdminDashboard = () => {
     const newValue = item.visible === false ? true : false; 
     handleLocalChange(collectionName, item.id, 'visible', newValue);
     try {
-      await pb.collection(collectionName).update(item.id, { visible: newValue }, { $autoCancel: false });
+      await supabase.from(collectionName).update({ visible: newValue }).eq('id', item.id);
       toast.success(newValue ? 'Élément visible' : 'Élément masqué');
     } catch (error) { toast.error('Erreur lors de la mise à jour'); }
   };
@@ -214,7 +208,7 @@ const AdminDashboard = () => {
   const handleDeleteItem = async (collection, id) => {
     if (!window.confirm('Voulez-vous vraiment supprimer cet élément ?')) return;
     try {
-      await pb.collection(collection).delete(id, { $autoCancel: false });
+      await supabase.from(collection).delete().eq('id', id);
       if (collection === 'services') setServices(services.filter(s => s.id !== id));
       else if (collection === 'highlights') setHighlights(highlights.filter(h => h.id !== id));
       else if (collection === 'reviews') setReviews(reviews.filter(r => r.id !== id));
@@ -228,7 +222,6 @@ const AdminDashboard = () => {
     { key: 'address', label: 'Adresse', type: 'text' },
     { key: 'phone', label: 'Téléphone', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
-    { key: 'opening_hours', label: 'Horaires', type: 'text' },
     { key: 'closure_message', label: 'Message de fermeture', type: 'textarea' },
     { key: 'intervention_radius', label: 'Rayon d\'intervention (en km)', type: 'number' }
   ];
@@ -240,7 +233,6 @@ const AdminDashboard = () => {
     { key: 'color_bg_card', label: 'Couleur Cartes et Footer' }
   ];
 
-  // Fonction pour afficher les listes standard
   const renderStandardList = (title, description, collectionName, items, sectionKey) => (
     <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
       <div 
@@ -319,8 +311,6 @@ const AdminDashboard = () => {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          
-          {/* STATISTIQUES */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             <Card className="bg-slate-900 border-slate-800">
               <CardHeader><div className="flex justify-between"><CardTitle className="text-slate-100">Messages</CardTitle><MessageSquare className="h-5 w-5 text-amber-500" /></div></CardHeader>
@@ -336,12 +326,8 @@ const AdminDashboard = () => {
             </Card>
           </div>
 
-          {/* ACCORDÉON : INFORMATIONS DE BASE */}
           <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
-            <div 
-              className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
-              onClick={() => toggleSection('info')}
-            >
+            <div className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors" onClick={() => toggleSection('info')}>
               <div>
                 <CardTitle className="text-slate-100">Informations de l'Entreprise</CardTitle>
                 <CardDescription className="text-slate-400 mt-1">Coordonnées et message d'urgence</CardDescription>
@@ -376,12 +362,8 @@ const AdminDashboard = () => {
             )}
           </Card>
 
-          {/* ACCORDÉON : DESIGN ET COULEURS */}
           <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
-            <div 
-              className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
-              onClick={() => toggleSection('theme')}
-            >
+            <div className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors" onClick={() => toggleSection('theme')}>
               <div className="flex items-center gap-4">
                 <Palette className="h-8 w-8 text-amber-500" />
                 <div>
@@ -423,15 +405,8 @@ const AdminDashboard = () => {
                             <p className="text-slate-300 font-mono uppercase">{themeSettings?.[field.key] || 'Par défaut'}</p>
                           </div>
                           
-                          {/* 🟢 Le bouton de restauration de couleur s'affiche ici si une ancienne couleur existe */}
                           {themeSettings?.[`prev_${field.key}`] && (
-                            <Button 
-                              onClick={() => handleRestoreTheme(field.key)} 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-amber-500 hover:text-amber-400 hover:bg-slate-800 flex items-center gap-2"
-                              title="Annuler le dernier changement"
-                            >
+                            <Button onClick={() => handleRestoreTheme(field.key)} variant="ghost" size="sm" className="text-amber-500 hover:text-amber-400 hover:bg-slate-800 flex items-center gap-2" title="Annuler le dernier changement">
                               <Undo className="h-4 w-4" />
                               <span className="hidden sm:inline font-mono text-xs">{themeSettings[`prev_${field.key}`]}</span>
                             </Button>
@@ -445,16 +420,11 @@ const AdminDashboard = () => {
             )}
           </Card>
 
-          {/* ACCORDÉONS : SERVICES & HIGHLIGHTS */}
           {renderStandardList("Gestion des Services", "Ces éléments s'affichent sous forme de grandes cartes", "services", services, "services")}
           {renderStandardList("Points Forts", "Ces éléments s'affichent au-dessus des avis", "highlights", highlights, "highlights")}
 
-          {/* ACCORDÉON : AVIS CLIENTS */}
           <Card className="bg-slate-900 border-slate-800 mb-6 overflow-hidden">
-            <div 
-              className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors"
-              onClick={() => toggleSection('reviews')}
-            >
+            <div className="flex flex-row items-center justify-between p-6 cursor-pointer hover:bg-slate-800/50 transition-colors" onClick={() => toggleSection('reviews')}>
               <div>
                 <CardTitle className="text-slate-100">Avis Clients</CardTitle>
                 <CardDescription className="text-slate-400 mt-1">Gérez les avis qui défilent sur la page d'accueil</CardDescription>

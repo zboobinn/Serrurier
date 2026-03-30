@@ -44,13 +44,6 @@ const Footer = () => {
             </div>
           </div>
 
-          <div>
-            <h4 className="text-sm font-semibold text-slate-200 mb-4 tracking-wide uppercase">Horaires</h4>
-            <div className="flex items-center gap-2 text-slate-400">
-              <Clock className="h-4 w-4" />
-              <span className="text-sm">{businessInfo?.opening_hours ?? '24h/24 - 7j/7'}</span>
-            </div>
-          </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-800">

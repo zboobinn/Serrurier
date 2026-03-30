@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -7,24 +8,33 @@ export const AuthProvider = ({ children }) => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
-    if (pb.authStore.isValid && (pb.authStore.model?.collectionName === 'admin_users' || pb.authStore.model?.collectionName === 'admins')) {
-      setCurrentAdmin(pb.authStore.model);
-    }
-    setInitialLoading(false);
+    // Vérifier la session actuelle
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentAdmin(session?.user ?? null);
+      setInitialLoading(false);
+    });
+
+    // Écouter les changements de connexion
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentAdmin(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const authData = await pb.admins.authWithPassword(email, password);
-      setCurrentAdmin(authData.record);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setCurrentAdmin(data.user);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
     }
   };
 
-  const logout = () => {
-    pb.authStore.clear();
+  const logout = async () => {
+    await supabase.auth.signOut();
     setCurrentAdmin(null);
   };
 

@@ -17,9 +17,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import InitialLoader from './components/InitialLoader';
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabaseClient'; 
 
-// 🟢 Convertisseur Hexadecimal vers RGB pour Tailwind
 const hexToRgb = (hex) => {
   if (!hex) return null;
   hex = hex.replace('#', '');
@@ -36,13 +35,12 @@ const hexToRgb = (hex) => {
   return `${r} ${g} ${b}`;
 };
 
-// 🟢 INJECTEUR DE THÈME INVISIBLE (C'est lui qui applique les couleurs !)
 const ThemeInjector = () => {
   useEffect(() => {
     const fetchTheme = async () => {
       try {
-        const records = await pb.collection('theme_settings').getFullList({ $autoCancel: false });
-        if (records.length > 0) {
+        const { data: records, error } = await supabase.from('theme_settings').select('*');
+        if (records && records.length > 0) {
           const theme = records[0];
           const root = document.documentElement;
 
@@ -72,10 +70,7 @@ function App() {
   return (
     <AuthProvider>
       <BusinessInfoProvider>
-        
-        {/* 🟢 On place l'injecteur ici pour qu'il colore le site dès le chargement */}
         <ThemeInjector />
-
         {isLoading ? (
           <InitialLoader /> 
         ) : (

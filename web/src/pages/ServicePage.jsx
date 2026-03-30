@@ -7,10 +7,10 @@ import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
-import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 const ServicePage = () => {
-  const { id } = useParams(); // On récupère l'ID dans l'URL
+  const { id } = useParams();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const { businessInfo } = useBusinessInfo();
@@ -18,8 +18,13 @@ const ServicePage = () => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const record = await pb.collection('services').getOne(id);
-        setService(record);
+        const { data: record, error } = await supabase
+          .from('services')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (record) setService(record);
       } catch (error) {
         console.error("Erreur lors de la récupération du service:", error);
       } finally {
@@ -27,7 +32,6 @@ const ServicePage = () => {
       }
     };
     fetchService();
-    // On remonte tout en haut de la page au chargement
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -67,7 +71,6 @@ const ServicePage = () => {
             </div>
 
             <div className="prose prose-invert prose-amber max-w-none mb-12">
-              {/* Si tu ajoutes un champ 'content' de type Editor dans PocketBase, il s'affichera ici, sinon on utilise la description */}
               {service.content ? (
                 <div dangerouslySetInnerHTML={{ __html: service.content }} className="text-slate-300 leading-relaxed text-lg" />
               ) : (

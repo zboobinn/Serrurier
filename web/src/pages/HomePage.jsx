@@ -6,17 +6,15 @@ import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import SEOSchema from '@/components/SEOSchema.jsx';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
-import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { googleReviews } from '@/data/reviews';
 
-// Import de nos nouveaux composants de page d'accueil
 import HeroSection from '@/components/home/AccueilSection.jsx';
 import ServicesSection from '@/components/home/ServicesSection.jsx';
 import InterventionZoneSection from '@/components/home/ZoneInterventionSection.jsx';
 import AboutSection from '@/components/home/AProposSection.jsx';
 import ContactSection from '@/components/home/ContactSection.jsx';
 
-// 🟢 J'ai mis à jour tes 5 services par défaut
 const fallbackServices = [
   { id: 'fb1', icon: 'Clock', title: 'Dépannage Urgent 24/7', description: 'Intervention rapide à toute heure, jour et nuit, week-ends et jours fériés.' },
   { id: 'fb2', icon: 'DoorOpen', title: 'Portes de Garage', description: 'Installation, réparation et motorisation de portes de garage. Tous types de mécanismes.' },
@@ -36,7 +34,6 @@ const HomePage = () => {
   const { businessInfo } = useBusinessInfo();
   const [bannerVisible, setBannerVisible] = useState(true);
 
-  // État des données
   const [services, setServices] = useState(fallbackServices);
   const [highlights, setHighlights] = useState(fallbackHighlights);
   const [reviews, setReviews] = useState(googleReviews);
@@ -44,11 +41,15 @@ const HomePage = () => {
   useEffect(() => {
     const fetchDynamicData = async () => {
       try {
-        const [servicesData, highlightsData, reviewsData] = await Promise.all([
-          pb.collection('services').getFullList({ sort: 'created', $autoCancel: false }),
-          pb.collection('highlights').getFullList({ sort: 'created', $autoCancel: false }),
-          pb.collection('reviews').getFullList({ sort: '-date', $autoCancel: false })
+        const [servicesRes, highlightsRes, reviewsRes] = await Promise.all([
+          supabase.from('services').select('*'),
+          supabase.from('highlights').select('*'),
+          supabase.from('reviews').select('*')
         ]);
+
+        const servicesData = servicesRes.data || [];
+        const highlightsData = highlightsRes.data || [];
+        const reviewsData = reviewsRes.data || [];
 
         const visibleServices = servicesData.filter(s => s.visible !== false);
         const visibleHighlights = highlightsData.filter(h => h.visible !== false);
@@ -64,7 +65,7 @@ const HomePage = () => {
 
     const trackVisit = async () => {
       try {
-        await pb.collection('site_visits').create({ timestamp: new Date().toISOString(), page: 'home' }, { $autoCancel: false });
+        await supabase.from('site_visits').insert([{ page: 'home' }]);
       } catch (error) {}
     };
 
@@ -72,7 +73,6 @@ const HomePage = () => {
     trackVisit();
   }, []);
 
-  // Gestion du scroll lors d'un accès par lien d'ancrage
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace('#', '');
@@ -98,7 +98,6 @@ const HomePage = () => {
       <SEOSchema />
       <Header />
 
-      {/* Bannière d'alerte (si configurée dans le panel admin) */}
       {businessInfo?.closure_message && bannerVisible && (
         <div className="fixed top-[76px] left-0 w-full bg-red-600/95 backdrop-blur-sm border-b border-red-500 px-4 py-3 z-50 shadow-lg animate-in slide-in-from-top-2">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-center">
@@ -114,7 +113,6 @@ const HomePage = () => {
       )}
 
       <main>
-        {/* L'orchestration propre de tes 5 composants */}
         <HeroSection />
         <ServicesSection services={services} />
         <InterventionZoneSection />
