@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import SuccessMessage from '@/components/SuccessMessage.jsx';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
-//import pb from '@/lib/pocketbaseClient';
 import { supabase } from '@/lib/supabaseClient';
 
 const ContactSection = () => {

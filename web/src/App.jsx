@@ -17,7 +17,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import InitialLoader from './components/InitialLoader';
-import pb from '@/lib/pocketbaseClient'; 
+import { supabase } from "@/lib/supabaseClient";
 
 // 🟢 Convertisseur Hexadecimal vers RGB pour Tailwind
 const hexToRgb = (hex) => {

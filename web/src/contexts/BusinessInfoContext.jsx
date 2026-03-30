@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-//import pb from '@/lib/pocketbaseClient';
 import { supabase } from '@/lib/supabaseClient';
 
 const BusinessInfoContext = createContext({
