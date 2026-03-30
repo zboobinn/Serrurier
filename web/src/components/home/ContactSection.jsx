@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import SuccessMessage from '@/components/SuccessMessage.jsx';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
-import pb from '@/lib/pocketbaseClient';
+//import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 const ContactSection = () => {
   const { businessInfo } = useBusinessInfo();
@@ -20,17 +21,23 @@ const ContactSection = () => {
     setLoading(true); setError(''); setSuccess(false);
     
     try {
-      const finalData = {
-        name: formData.name,
-        email: formData.email,
-        message: `[Besoin : ${formData.need}]\n\n${formData.message}`
-      };
+      const { error: supabaseError } = await supabase
+        .from('contact_messages')
+        .insert([
+          { 
+            name: formData.name, 
+            email: formData.email, 
+            message: `[Besoin : ${formData.need}] ${formData.message}` 
+          }
+        ]);
 
-      await pb.collection('contact_messages').create(finalData, { $autoCancel: false });
+      if (supabaseError) throw supabaseError;
+
       setSuccess(true);
       setFormData({ name: '', email: '', need: '', message: '' });
-    } catch (err) { setError('Erreur d\'envoi.'); } 
-    finally { setLoading(false); }
+    } catch (err) {
+      setError("Erreur lors de l'envoi du message.");
+    }
   };
 
   return (

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import pb from '@/lib/pocketbaseClient';
+//import pb from '@/lib/pocketbaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 const BusinessInfoContext = createContext({
   businessInfo: null,
@@ -14,32 +15,12 @@ export const BusinessInfoProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchBusinessInfo = async () => {
-      try {
-        const records = await pb.collection('business_info').getFullList({ $autoCancel: false });
-        if (records.length > 0) {
-          setBusinessInfo(records[0]);
-        } else {
-          setBusinessInfo({
-            address: '62 rue Racine\n69100 Villeurbanne',
-            phone: '06 68 67 65 65',
-            email: 'serrurerieroland@orange.fr',
-            opening_hours: '24h/24 - 7j/7',
-            closure_message: ''
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch business info:', err);
-        setError(err);
-        setBusinessInfo({
-          address: '62 rue Racine\n69100 Villeurbanne',
-          phone: '06 68 67 65 65',
-          email: 'serrurerieroland@orange.fr',
-          opening_hours: '24h/24 - 7j/7',
-          closure_message: ''
-        });
-      } finally {
-        setLoading(false);
-      }
+      const { data, error } = await supabase
+        .from('business_info')
+        .select('*')
+        .single(); // On récupère la seule ligne de configuration
+
+      if (data) setBusinessInfo(data);
     };
 
     fetchBusinessInfo();

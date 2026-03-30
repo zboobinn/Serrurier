@@ -15,5 +15,8 @@
   "workspaces": [
     "web",
     "pocketbase"
-  ]
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.1"
+  }
 }
