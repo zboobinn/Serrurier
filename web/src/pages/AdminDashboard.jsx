@@ -304,7 +304,7 @@ const AdminDashboard = () => {
                 <p className="text-sm text-slate-400 mt-1">Serrurerie Roland</p>
               </div>
               <Button onClick={handleLogout} variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                <LogOut className="h-4 w-4 mr-2" /> Déconnexion
+                <LogOut className="h-4 w-4 mr-2" /> Déconnexionn
               </Button>
             </div>
           </div>
