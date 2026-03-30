@@ -7,7 +7,7 @@ const ServicesSection = ({ services }) => {
   return (
     <section id="services" className="py-20 bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" data-aos="fade-up">
           <h2 className="text-3xl md:text-4xl font-semibold text-slate-100 mb-4">Nos Services</h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Une gamme complète de services de serrurerie et vitrerie
@@ -15,7 +15,7 @@ const ServicesSection = ({ services }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {services.slice(0, 2).map((service) => {
+          {services.slice(0, 2).map((service, index) => {
             const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
             let linkUrl = `/service/${service.id}`;
             if (service.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
@@ -26,7 +26,11 @@ const ServicesSection = ({ services }) => {
 
             return (
               <Link to={linkUrl} key={service.id} className="block h-full group">
-                <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                <Card 
+                  className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
+                  data-aos="fade-up" 
+                  data-aos-delay={index * 150}
+                >
                   <CardContent className="p-8 flex-1">
                     <div className="flex items-start gap-4">
                       <div className="p-3 bg-amber-500/10 rounded-xl flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
@@ -46,7 +50,7 @@ const ServicesSection = ({ services }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {services.slice(2).map((service) => {
+          {services.slice(2).map((service, index) => {
             const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
             let linkUrl = `/service/${service.id}`;
             if (service.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
@@ -57,7 +61,11 @@ const ServicesSection = ({ services }) => {
 
             return (
               <Link to={linkUrl} key={service.id} className="block h-full group">
-                <Card className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                <Card 
+                  className="bg-slate-900/50 border-slate-800 group-hover:shadow-xl group-hover:border-amber-500/50 group-hover:-translate-y-1 transition-all duration-300 h-full flex flex-col"
+                  data-aos="fade-up" 
+                  data-aos-delay={(index + 2) * 150}
+                >
                   <CardContent className="p-8 flex-1 flex flex-col">
                     <div className="p-3 bg-amber-500/10 rounded-xl w-fit mb-4 group-hover:bg-amber-500/20 transition-colors">
                       <IconComp className="h-8 w-8 text-amber-500" />

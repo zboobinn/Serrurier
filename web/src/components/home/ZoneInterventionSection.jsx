@@ -21,13 +21,16 @@ const InterventionZoneSection = () => {
   return (
     <section id="zone-intervention" className="py-20 bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" data-aos="fade-down">
           <h2 className="text-3xl md:text-4xl font-semibold text-slate-100 mb-4">Zone d'Intervention</h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">Intervention rapide sur Lyon et sa périphérie</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 h-[400px] md:h-[500px] shadow-xl">
+          <div 
+            className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 h-[400px] md:h-[500px] shadow-xl"
+            data-aos="fade-right"
+          >
             <MapContainer center={position} zoom={11} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Circle center={position} radius={interventionRadius} pathOptions={{ color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.2 }} />
@@ -35,7 +38,7 @@ const InterventionZoneSection = () => {
             </MapContainer>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6" data-aos="fade-left" data-aos-delay="200">
             <h3 className="text-2xl font-bold text-slate-100">Disponibilité immédiate dans le Grand Lyon</h3>
             <div className="space-y-4 text-slate-300 leading-relaxed">
               <p>Serrurerie Roland intervient rapidement pour toutes vos urgences et projets d'installation dans un rayon d'environ <strong>{businessInfo?.intervention_radius || 20} km</strong> autour de Lyon.</p>

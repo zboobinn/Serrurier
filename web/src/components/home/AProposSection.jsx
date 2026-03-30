@@ -11,7 +11,7 @@ const AboutSection = ({ highlights, reviews }) => {
   return (
     <section id="apropos" className="py-20 bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" data-aos="fade-up">
           <h2 className="text-3xl md:text-4xl font-semibold text-slate-100 mb-6">25 Ans d'Expérience</h2>
           <div className="max-w-3xl mx-auto space-y-4 text-slate-300 leading-relaxed">
             <p>Depuis plus de 25 ans, Serrurerie Roland est votre partenaire de confiance pour tous vos besoins en serrurerie à Lyon et dans ses alentours. Notre expertise couvre l'installation, la réparation et le dépannage d'urgence de tous types de serrures et systèmes de sécurité.</p>
@@ -24,7 +24,12 @@ const AboutSection = ({ highlights, reviews }) => {
           {highlights.map((highlight, index) => {
             const IconComp = LucideIcons[highlight.icon] || LucideIcons.CheckCircle2;
             return (
-              <div key={index} className="text-center">
+              <div 
+                key={index} 
+                className="text-center"
+                data-aos="fade-up" 
+                data-aos-delay={index * 150}
+              >
                 <div className="inline-flex p-4 bg-amber-500/10 rounded-2xl mb-4">
                   <IconComp className="h-12 w-12 text-amber-500" />
                 </div>
@@ -35,7 +40,7 @@ const AboutSection = ({ highlights, reviews }) => {
           })}
         </div>
 
-        <div className="border-t border-slate-800 pt-16">
+        <div className="border-t border-slate-800 pt-16" data-aos="fade-up">
           <div className="text-center mb-12"><h2 className="text-3xl font-semibold text-slate-100">Ce que disent nos clients</h2></div>
           <div className="relative w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
             <div className="flex gap-6 animate-marquee py-4">
