@@ -14,6 +14,8 @@ import ServicesSection from '@/components/home/ServicesSection.jsx';
 import InterventionZoneSection from '@/components/home/ZoneInterventionSection.jsx';
 import AboutSection from '@/components/home/AProposSection.jsx';
 import ContactSection from '@/components/home/ContactSection.jsx';
+import AssurancesBanner from '@/components/home/AssurancesBanner';
+
 
 const fallbackServices = [
   { id: 'fb1', icon: 'Clock', title: 'Dépannage Urgent 24/7', description: 'Intervention rapide à toute heure, jour et nuit, week-ends et jours fériés.' },
@@ -114,6 +116,7 @@ const HomePage = () => {
 
       <main>
         <HeroSection />
+        <AssurancesBanner />
         <ServicesSection services={services} />
         <InterventionZoneSection />
         <AboutSection highlights={highlights} reviews={reviews} />

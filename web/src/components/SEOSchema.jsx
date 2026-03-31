@@ -10,7 +10,11 @@ const SEOSchema = () => {
     "@context": "https://schema.org",
     "@type": "Locksmith",
     "name": "Serrurerie Roland",
-    "image": "https://serrurerie-roland.com/porte-garage.jpg", // À remplacer par ton vrai nom de domaine plus tard
+    // 🟢 AJOUT 1 : Une description claire contenant tes mots-clés principaux
+    "description": "Artisan serrurier de confiance à Lyon et alentours. Intervention d'urgence 24h/24 et 7j/7, ouverture de porte sans casse, installation de portes blindées et vitrerie.",
+    "image": "https://serrurerie-roland.com/FondAccueil.webp", // (Pense à mettre ton vrai nom de domaine plus tard)
+    // 🟢 AJOUT 2 : Le logo officiel
+    "logo": "https://serrurerie-roland.com/icon.png", 
     "@id": "https://serrurerie-roland.com/",
     "url": "https://serrurerie-roland.com/",
     "telephone": businessInfo?.phone ?? "06 68 67 65 65",
@@ -27,6 +31,11 @@ const SEOSchema = () => {
       "latitude": 45.7640,
       "longitude": 4.8357
     },
+    // 🟢 AJOUT 3 : Liens vers tes autres profils (à décommenter et remplir si tu en as)
+    "sameAs": [
+      // "https://www.facebook.com/SerrurerieRoland",
+      // "https://www.pagesjaunes.fr/pros/ton-id-pages-jaunes"
+    ],
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": [
@@ -58,16 +67,18 @@ const SEOSchema = () => {
       { "@type": "City", "name": "Vaulx-en-Velin" },
       { "@type": "City", "name": "Saint-Priest" },
       { "@type": "City", "name": "Caluire-et-Cuire" },
+      { "@type": "City", "name": "Oullins" },
+      { "@type": "City", "name": "Sainte-Foy-lès-Lyon" },
       { "@type": "City", "name": "Tassin-la-Demi-Lune" },
       { "@type": "City", "name": "Ecully" },
-      { "@type": "City", "name": "Sainte-Foy-lès-Lyon" },
-      { "@type": "City", "name": "Décines-Charpieu" }
+      { "@type": "City", "name": "Décines-Charpieu" },
+      { "@type": "City", "name": "Meyzieu" }
     ]
   };
 
   return (
     <Helmet>
-      {/* Google lira ce script invisible */}
+      {/* On injecte le script JSON-LD dans le head de la page */}
       <script type="application/ld+json">
         {JSON.stringify(schemaData)}
       </script>
