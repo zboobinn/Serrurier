@@ -32,13 +32,13 @@ const HeroSection = () => {
           </span>
         </div>
 
-        {/* 2. Titre Principal avec effet de dégradé */}
+        {/* 2. Titre Principal (Couleur unie rétablie) */}
         <h1 
           className="text-5xl md:text-7xl font-extrabold text-slate-100 mb-6 tracking-tight leading-tight" 
           data-aos="fade-up"
           data-aos-delay="100"
         >
-          Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Serrurier Lyonnais</span><br/> de Confiance
+          Votre <span className="text-amber-500">Serrurier Lyonnais</span><br/> de Confiance
         </h1>
         
         {/* 3. Sous-titre */}
@@ -61,7 +61,6 @@ const HeroSection = () => {
             href={`tel:${cleanPhone}`} 
             className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-amber-500 text-slate-950 rounded-xl text-lg font-bold hover:bg-amber-400 shadow-[0_0_30px_-5px_rgba(245,158,11,0.5)] transition-all hover:scale-105 w-full sm:w-auto overflow-hidden"
           >
-            {/* Effet de brillance au survol (brillance invisible par défaut qui traverse le bouton) */}
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"></div>
             
             <Phone className="h-6 w-6" />
