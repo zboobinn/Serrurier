@@ -131,7 +131,7 @@ const ContactSection = () => {
               </div>
               <h3 className="text-xl font-bold text-slate-100 mb-2">Devis Rapide par Photo</h3>
               <p className="text-slate-300 text-sm flex items-center justify-center gap-2">
-                <Camera className="w-4 h-4" /> Envoyez une photo de votre serrure sur WhatsApp
+                <Camera className="w-4 h-4" /> Envoyez nous une photo sur WhatsApp
               </p>
             </a>
 
