@@ -21,7 +21,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const hexToRgb = (hex) => {
   if (!hex) return null;
-  hex = hex.replace('#', '');
+  hex = hex.replace('#', ''); 
   let r = 0, g = 0, b = 0;
   if (hex.length === 3) {
     r = parseInt(hex[0] + hex[0], 16);
