@@ -1,7 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as LucideIcons from 'lucide-react';
+// 🟢 1. Imports ciblés (fini le "import * as LucideIcons")
+import { Wrench, ShieldCheck, Key, Lock, Home, Shield, DoorOpen, DoorClosed, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+
+// 🟢 2. Le dictionnaire d'icônes (seules celles-ci seront compilées dans ton site)
+const iconMap = {
+  Wrench,
+  ShieldCheck,
+  Key,
+  Lock,
+  Home,
+  Shield,
+  DoorOpen,
+  DoorClosed,
+  AlertTriangle
+};
 
 const ServicesSection = ({ services }) => {
   return (
@@ -14,10 +28,11 @@ const ServicesSection = ({ services }) => {
           </p>
         </div>
 
-        {/* Réduction de l'espace entre les cartes sur mobile (gap-4 au lieu de gap-8) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
           {services.slice(0, 2).map((service, index) => {
-            const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
+            // 🟢 3. On utilise notre dictionnaire ici
+            const IconComp = iconMap[service.icon] || Wrench;
+            
             let linkUrl = `/service/${service.id}`;
             if (service.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
             else if (service.title.includes('Blindée') || service.title.includes('Blindee')) linkUrl = '/services/portes-blindees';
@@ -32,7 +47,6 @@ const ServicesSection = ({ services }) => {
                   data-aos="fade-up" 
                   data-aos-delay={index * 150}
                 >
-                  {/* Padding réduit à p-5 sur mobile, p-8 sur PC */}
                   <CardContent className="p-5 md:p-8 flex-1">
                     <div className="flex items-start gap-3 md:gap-4">
                       <div className="p-2 md:p-3 bg-amber-500/10 rounded-xl flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
@@ -53,7 +67,9 @@ const ServicesSection = ({ services }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
           {services.slice(2).map((service, index) => {
-            const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
+            // 🟢 3. On utilise notre dictionnaire ici aussi
+            const IconComp = iconMap[service.icon] || Wrench;
+            
             let linkUrl = `/service/${service.id}`;
             if (service.title.includes('Garage')) linkUrl = '/services/portes-de-garage';
             else if (service.title.includes('Blindée') || service.title.includes('Blindee')) linkUrl = '/services/portes-blindees';
@@ -73,7 +89,6 @@ const ServicesSection = ({ services }) => {
                       <div className="p-2 md:p-3 bg-amber-500/10 rounded-xl w-fit group-hover:bg-amber-500/20 transition-colors">
                         <IconComp className="h-6 w-6 md:h-8 md:w-8 text-amber-500" />
                       </div>
-                      {/* Sur mobile, le titre est à côté de l'icône. Sur PC, il est en dessous. */}
                       <h3 className="text-lg md:text-xl font-semibold text-slate-100 md:mt-3 break-words group-hover:text-amber-500 transition-colors">{service.title}</h3>
                     </div>
                     

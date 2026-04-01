@@ -2,12 +2,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import * as LucideIcons from 'lucide-react';
+// 🟢 1. Imports ciblés (on importe uniquement ce dont on a besoin)
+import { Wrench, Phone, ArrowLeft, ShieldCheck, Key, Lock, Home, Shield, DoorOpen, DoorClosed, AlertTriangle } from 'lucide-react';
 import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import LoadingSpinner from '@/components/LoadingSpinner.jsx';
 import { useBusinessInfo } from '@/contexts/BusinessInfoContext.jsx';
 import { supabase } from '@/lib/supabaseClient';
+
+// 🟢 2. Le dictionnaire d'icônes pour l'affichage dynamique
+const iconMap = {
+  Wrench,
+  ShieldCheck,
+  Key,
+  Lock,
+  Home,
+  Shield,
+  DoorOpen,
+  DoorClosed,
+  AlertTriangle
+};
 
 const ServicePage = () => {
   const { id } = useParams();
@@ -44,8 +58,8 @@ const ServicePage = () => {
     </div>
   );
 
-  const IconComp = LucideIcons[service.icon] || LucideIcons.Wrench;
-  const { Phone, ArrowLeft } = LucideIcons;
+  // 🟢 3. On utilise notre dictionnaire ici (plus de LucideIcons global)
+  const IconComp = iconMap[service.icon] || Wrench;
 
   return (
     <>
@@ -59,6 +73,7 @@ const ServicePage = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
           
           <Link to="/" className="inline-flex items-center text-slate-400 hover:text-amber-500 transition-colors mb-8">
+            {/* L'icône ArrowLeft est maintenant utilisée directement */}
             <ArrowLeft className="h-4 w-4 mr-2" /> Retour à l'accueil
           </Link>
 
@@ -82,6 +97,7 @@ const ServicePage = () => {
               <h3 className="text-xl font-semibold text-slate-100 mb-4">Besoin de ce service ?</h3>
               <p className="text-slate-400 mb-6">Contactez-nous pour une intervention rapide ou un devis gratuit.</p>
               <a href={`tel:${(businessInfo?.phone ?? '06 68 67 65 65').replace(/\s/g, '')}`} className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-amber-500 text-slate-950 rounded-xl font-semibold hover:bg-amber-400 transition-all active:scale-[0.98]">
+                {/* L'icône Phone est maintenant utilisée directement */}
                 <Phone className="h-5 w-5" />
                 <span>Appelez le {businessInfo?.phone ?? '06 68 67 65 65'}</span>
               </a>

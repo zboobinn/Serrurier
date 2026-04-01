@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import * as LucideIcons from 'lucide-react';
+// 🟢 1. Imports ciblés (fini le "import * as LucideIcons")
+import { Star, ChevronLeft, ChevronRight, CheckCircle2, ShieldCheck, Clock, Award, ThumbsUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { getRelativeTime } from '@/utils/dateUtils';
 
+// 🟢 2. Le dictionnaire d'icônes pour les "highlights" (points forts)
+const highlightIconMap = {
+  CheckCircle2,
+  ShieldCheck,
+  Clock,
+  Award,
+  ThumbsUp,
+  Star
+};
+
 const AboutSection = ({ highlights, reviews }) => {
-  const { Star, ChevronLeft, ChevronRight } = LucideIcons;
+  // 🟢 3. Plus besoin d'extraire les icônes avec "const { Star } = LucideIcons;", on les a importées directement
   
   const filteredReviews = reviews.filter(review => review.rating >= 4);
   const scrollingReviews = [...filteredReviews, ...filteredReviews];
@@ -41,7 +52,9 @@ const AboutSection = ({ highlights, reviews }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16 md:mb-24">
           {highlights.map((highlight, index) => {
-            const IconComp = LucideIcons[highlight.icon] || LucideIcons.CheckCircle2;
+            // 🟢 4. On utilise notre dictionnaire ici
+            const IconComp = highlightIconMap[highlight.icon] || CheckCircle2;
+            
             return (
               <div 
                 key={index} 
@@ -64,7 +77,7 @@ const AboutSection = ({ highlights, reviews }) => {
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-100">Ce que disent nos clients</h2>
           </div>
           
-          {/* VERSION PC : Défilement infini classique */}
+          {/* VERSION PC */}
           <div className="hidden md:block relative w-full overflow-hidden" style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
             
             <div className="flex items-center gap-6 animate-marquee py-4 hover:[animation-play-state:paused]">
@@ -73,6 +86,7 @@ const AboutSection = ({ highlights, reviews }) => {
                   <CardContent className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex gap-1 text-amber-500 mb-5">
+                        {/* La balise <Star /> est désormais utilisée directement */}
                         {[...Array(review.rating)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
                       </div>
                       <p className="text-base text-slate-300 italic mb-5">"{review.text}"</p>
@@ -87,7 +101,7 @@ const AboutSection = ({ highlights, reviews }) => {
             </div>
           </div>
 
-          {/* VERSION MOBILE : Fade & Scale Transition (Moderne) */}
+          {/* VERSION MOBILE */}
           <div className="block md:hidden relative w-full px-10">
             <button 
               onClick={prevSlide} 
