@@ -188,7 +188,7 @@ const MenuiserieFermeturePage = () => {
         </section>
 
         {/* CTA FINAL */}
-        <section className="py-20">
+        <section className="py-20"> 
           <div className="max-w-5xl mx-auto px-4">
             <div className="bg-amber-500 rounded-3xl p-8 md:p-12 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-950 mb-6">Un projet de menuiserie en tête ?</h2>
