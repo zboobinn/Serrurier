@@ -108,6 +108,7 @@ const Header = () => {
     else if (title.includes('Dépannage') || title.includes('Depannage') || title.includes('Urgent')) linkUrl = '/services/depannage-urgent';
     else if (title.includes('Rideau')) linkUrl = '/services/rideaux-metalliques';
     else if (title.includes('Vitrerie') || title.includes('Vitre')) linkUrl = '/services/vitrerie';
+    else if (title.includes('Menuiserie') || title.includes('Fermeture')) linkUrl = '/services/menuiserie-fermetures';
     
     return linkUrl;
   };

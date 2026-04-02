@@ -13,6 +13,7 @@ import LegalNoticePage from './pages/MentionsLegalesPage';
 import EmergencyPage from './pages/DepannageUrgentPage';
 import MetalShuttersPage from './pages/RideauxMetalPage';
 import VitreriePage from './pages/VitreriePage';
+import MenuiserieFermeturePage from './pages/MenuiserieFermeturePage';
 import { AuthProvider } from './contexts/AuthContext';
 import { BusinessInfoProvider } from './contexts/BusinessInfoContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -85,6 +86,7 @@ function App() {
                 <Route path="/services/depannage-urgent" element={<EmergencyPage />} />
                 <Route path="/services/rideaux-metalliques" element={<MetalShuttersPage />} />
                 <Route path="/services/vitrerie" element={<VitreriePage />} />
+                <Route path="/services/menuiserie-fermetures" element={<MenuiserieFermeturePage />} />
                 <Route path="/mentions-legales" element={<LegalNoticePage />} />
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               </Routes>

@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-// 🟢 1. Imports ciblés (fini le "import * as LucideIcons")
 import { Wrench, ShieldCheck, Key, Lock, Home, Shield, DoorOpen, DoorClosed, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
-// 🟢 2. Le dictionnaire d'icônes (seules celles-ci seront compilées dans ton site)
+// Le dictionnaire d'icônes (seules celles-ci seront compilées dans ton site)
 const iconMap = {
   Wrench,
   ShieldCheck,
@@ -30,7 +29,6 @@ const ServicesSection = ({ services }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
           {services.slice(0, 2).map((service, index) => {
-            // 🟢 3. On utilise notre dictionnaire ici
             const IconComp = iconMap[service.icon] || Wrench;
             
             let linkUrl = `/service/${service.id}`;
@@ -39,6 +37,8 @@ const ServicesSection = ({ services }) => {
             else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) linkUrl = '/services/depannage-urgent';
             else if (service.title.includes('Rideau') || service.title.includes('Métallique')) linkUrl = '/services/rideaux-metalliques';
             else if (service.title.includes('Vitrerie') || service.title.includes('Vitre')) linkUrl = '/services/vitrerie'; 
+            // 🟢 NOUVEAU : Redirection pour la Menuiserie
+            else if (service.title.includes('Menuiserie') || service.title.includes('Fermeture')) linkUrl = '/services/menuiserie-fermetures';
 
             return (
               <Link to={linkUrl} key={service.id} className="block h-full group">
@@ -67,7 +67,6 @@ const ServicesSection = ({ services }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
           {services.slice(2).map((service, index) => {
-            // 🟢 3. On utilise notre dictionnaire ici aussi
             const IconComp = iconMap[service.icon] || Wrench;
             
             let linkUrl = `/service/${service.id}`;
@@ -76,6 +75,8 @@ const ServicesSection = ({ services }) => {
             else if (service.title.includes('Dépannage') || service.title.includes('Depannage') || service.title.includes('Urgent')) linkUrl = '/services/depannage-urgent';
             else if (service.title.includes('Rideau') || service.title.includes('Métallique')) linkUrl = '/services/rideaux-metalliques';
             else if (service.title.includes('Vitrerie') || service.title.includes('Vitre')) linkUrl = '/services/vitrerie';
+            // 🟢 NOUVEAU : Redirection pour la Menuiserie
+            else if (service.title.includes('Menuiserie') || service.title.includes('Fermeture')) linkUrl = '/services/menuiserie-fermetures';
 
             return (
               <Link to={linkUrl} key={service.id} className="block h-full group">
